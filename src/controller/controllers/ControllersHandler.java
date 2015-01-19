@@ -105,6 +105,9 @@ public class ControllersHandler {
 
 			Controller controller = controllersList.get(window
 					.getSelectedControllerName());
+			Controller controller_arm = controllersList.get(window
+					.getSelectedArmDevicesName());
+
 
 			// Pull controller for current data, and break while loop if
 			// controller is disconnected.
@@ -112,6 +115,11 @@ public class ControllersHandler {
 				window.showControllerDisconnected();
 				break;
 			}
+			if (!controller_arm.poll()) {
+				window.showControllerDisconnected();
+				break;
+			}
+			
 
 			// X axis and Y axis
 			int xAxisPercentage = 0, yAxisPercentage = 0, zAxisPercentage = 0;
@@ -131,7 +139,47 @@ public class ControllersHandler {
 
 			// Go trough all components of the controller.
 			Component[] components = controller.getComponents();
+			Component[] components_arm = controller_arm.getComponents();
+			
+			for (int i = 0; i < components_arm.length; i++) {
+				Component component_arm = components_arm[i];
 
+				Identifier componentIdentifier_arm = component_arm.getIdentifier();
+	
+					
+				// Buttons
+				// if(component.getName().contains("Button")){ // If the
+				// language is not english, this won't work.
+				if (componentIdentifier_arm.getName().matches("^[0-9]*$")
+						|| componentIdentifier_arm.getName().matches("^[A-Z]*$")) {
+					// Is button pressed?
+					boolean isItPressed = true;
+					if (component_arm.getPollData() == 0.0f)
+						isItPressed = false;
+			
+					// Button index
+					String buttonIndex;
+					buttonIndex = component_arm.getIdentifier().toString();
+
+					
+					JToggleButton aToggleButton_arm = new JToggleButton(
+							buttonIndex, isItPressed);
+					aToggleButton_arm.setPreferredSize(new Dimension(48, 25));
+					aToggleButton_arm.setEnabled(false);
+					buttonsPanel_arm.add(aToggleButton_arm);
+					
+					
+					// We know that this component was button so we can skip to
+					// next component.
+					continue;
+				}
+				window.setArmDevicesButtons(buttonsPanel_arm);
+				// We have to give processor some rest.
+				
+			}
+
+			
+			// set x and y axes
 			for (int i = 0; i < components.length; i++) {
 				Component component = components[i];
 
@@ -146,7 +194,8 @@ public class ControllersHandler {
 					boolean isItPressed = true;
 					if (component.getPollData() == 0.0f)
 						isItPressed = false;
-
+					
+					
 					// Button index
 					String buttonIndex;
 					buttonIndex = component.getIdentifier().toString();
@@ -157,14 +206,7 @@ public class ControllersHandler {
 					aToggleButton.setPreferredSize(new Dimension(48, 25));
 					aToggleButton.setEnabled(false);
 					buttonsPanel.add(aToggleButton);
-					
-					JToggleButton aToggleButton_arm = new JToggleButton(
-							buttonIndex, isItPressed);
-					aToggleButton_arm.setPreferredSize(new Dimension(48, 25));
-					aToggleButton_arm.setEnabled(false);
-					buttonsPanel_arm.add(aToggleButton_arm);
-					
-					
+									
 					
 					if(isItPressed){	
 						switch (componentIdentifier.getName()) {
@@ -250,8 +292,6 @@ public class ControllersHandler {
 			// Now that we go trough all controller components,
 			// we add butons panel to window,
 			window.setControllerButtons(buttonsPanel);
-			// we add arm butons panel to window,
-			window.setArmDevicesButtons(buttonsPanel_arm);
 			// set x and y axes,
 			window.setXYAxis(xAxisPercentage, yAxisPercentage);
 			// add other axes panel to window.
@@ -267,8 +307,8 @@ public class ControllersHandler {
 				Logger.getLogger(ControllersHandler.class.getName()).log(
 						Level.SEVERE, null, ex);
 			}
-
-		}
+			
+		}//for end
 		connection.getAmberClient().terminate();
 	}
 
