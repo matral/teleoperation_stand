@@ -140,7 +140,7 @@ public class ControllersHandler {
 			// Go trough all components of the controller.
 			Component[] components = controller.getComponents();
 			Component[] components_arm = controller_arm.getComponents();
-			
+			//manipulator controllers
 			for (int i = 0; i < components_arm.length; i++) {
 				Component component_arm = components_arm[i];
 
@@ -179,7 +179,7 @@ public class ControllersHandler {
 			}
 
 			
-			// set x and y axes
+			// car controllers
 			for (int i = 0; i < components.length; i++) {
 				Component component = components[i];
 
