@@ -5,6 +5,8 @@ import java.awt.Container;
 import java.awt.FlowLayout;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.GroupLayout;
 import javax.swing.JPanel;
@@ -12,6 +14,7 @@ import javax.swing.JSplitPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
+import controller.controllers.ControllersHandler;
 import net.java.games.input.Component;
 
 /**
@@ -29,7 +32,7 @@ public class JFrameWindow extends javax.swing.JFrame {
 	/**
 	 * Creates new form JFrameWindow
 	 */
-	public JFrameWindow() {
+	public JFrameWindow(ControllersHandler controllersHandler) {
 		// Set look and feel
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -38,7 +41,7 @@ public class JFrameWindow extends javax.swing.JFrame {
 			e.printStackTrace();
 		}
 
-		initComponents();
+		initComponents(controllersHandler);
 
 		this.setResizable(true);
 		this.setLocationRelativeTo(null);
@@ -53,7 +56,7 @@ public class JFrameWindow extends javax.swing.JFrame {
 	@SuppressWarnings("unchecked")
 	// <editor-fold defaultstate="collapsed"
 	// desc="Generated Code">//GEN-BEGIN:initComponents
-	private void initComponents() {
+	private void initComponents(ControllersHandler controllersHandler) {
 
 		jPanelAxes = new javax.swing.JPanel();
 		jLabelXYAxis = new javax.swing.JLabel();
@@ -62,8 +65,15 @@ public class JFrameWindow extends javax.swing.JFrame {
 		jPanelButtons = new javax.swing.JPanel();
 		jPanelButtons_arm = new javax.swing.JPanel();
 		jPanelHatSwitch = new javax.swing.JPanel();
-		jComboBox_controllers = new javax.swing.JComboBox();
+		jComboBox_carControllers = new javax.swing.JComboBox();
 		jComboBox_armControllers = new javax.swing.JComboBox();
+		jComboBox_armControllers.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				controllersHandler.setListeners();
+			}
+		});
 
 		setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 		setTitle("JInput Joystick Test");
@@ -213,7 +223,7 @@ public class JFrameWindow extends javax.swing.JFrame {
 				.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
 				.addGap(0, 0, Short.MAX_VALUE));
 
-		jComboBox_controllers
+		jComboBox_carControllers
 				.addActionListener(new java.awt.event.ActionListener() {
 					public void actionPerformed(java.awt.event.ActionEvent evt) {
 						jComboBox_controllersActionPerformed(evt);
@@ -282,7 +292,7 @@ public class JFrameWindow extends javax.swing.JFrame {
 																				0,
 																				Short.MAX_VALUE)
 																		.addComponent(
-																				jComboBox_controllers,
+																				jComboBox_carControllers,
 																				javax.swing.GroupLayout.PREFERRED_SIZE,
 																				237,
 																				javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -300,7 +310,7 @@ public class JFrameWindow extends javax.swing.JFrame {
 												javax.swing.GroupLayout.DEFAULT_SIZE,
 												Short.MAX_VALUE)
 										.addComponent(
-												jComboBox_controllers,
+												jComboBox_carControllers,
 												javax.swing.GroupLayout.PREFERRED_SIZE,
 												javax.swing.GroupLayout.DEFAULT_SIZE,
 												javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -430,7 +440,7 @@ public class JFrameWindow extends javax.swing.JFrame {
 	}
 
 	// Variables declaration - do not modify//GEN-BEGIN:variables
-	private javax.swing.JComboBox jComboBox_controllers;
+	private javax.swing.JComboBox jComboBox_carControllers;
 	private javax.swing.JComboBox jComboBox_armControllers;
 	private javax.swing.JLabel jLabelXYAxis;
 	private javax.swing.JPanel jPanelAxes;
@@ -444,24 +454,27 @@ public class JFrameWindow extends javax.swing.JFrame {
 
 	/* Methods for setting components on the window. */
 
-	public int getSelectedControllerName() {
-		return jComboBox_controllers.getSelectedIndex();
+	public int getSelectedCarControllerName() {
+		return jComboBox_carControllers.getSelectedIndex();
 	}
-	public int getSelectedArmDevicesName() {
-		return jComboBox_armControllers.getSelectedIndex();
-	}
-	
-	public void addControllerName(String controllerName) {
-		jComboBox_controllers.addItem(controllerName);
+	public String getSelectedArmDevicesName() {
+		return (String)jComboBox_armControllers.getSelectedItem();
 	}
 	
-	public void addArmDevicesName(String controllerName) {
+	public void addCarControllerName(String controllerName) {
+		jComboBox_carControllers.addItem(controllerName);
+	}
+	
+	public void addArmControllerName(String controllerName) {
 		jComboBox_armControllers.addItem(controllerName);
+	}
+	public void removeArmControllerName(String controllerName){
+		jComboBox_armControllers.removeItem(controllerName);
 	}
 
 	public void showControllerDisconnected() {
-		jComboBox_controllers.removeAllItems();
-		jComboBox_controllers.addItem("Controller disconnected!");
+		jComboBox_carControllers.removeAllItems();
+		jComboBox_carControllers.addItem("Controller disconnected!");
 	}
 	public void showArmDevicesNameDisconnected() {
 		jComboBox_armControllers.removeAllItems();

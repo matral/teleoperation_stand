@@ -5,7 +5,11 @@
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="C:/Users/Radek/Desktop/amber/lib"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="C:/Users/Radek/Desktop/amber/myo/x64"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="lib" path="C:/Users/Radek/Desktop/amber/lib/jinput.jar">
 		<attributes>
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="C:/Users/Radek/Desktop/amber/lib"/>
@@ -14,5 +18,14 @@
 	<classpathentry kind="lib" path="C:/Users/Radek/Desktop/amber/java_pololu/org.robokind.impl.motion.pololu-0.9.5-sources.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Radek/Desktop/amber/the_best_and_only_amber/amber-java-common-1.0-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Radek/Desktop/amber/the_best_and_only_amber/amber-java-roboclaw-1.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Radek/Desktop/amber/USB/commons-lang3-3.2.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Radek/Desktop/amber/USB/libusb4java-1.2.0-windows-x86_64.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Radek/Desktop/amber/USB/usb4java-1.2.0.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Radek/Desktop/amber/leap/LeapJava.jar">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="C:/Users/Radek/Desktop/amber/leap"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/Radek/Desktop/amber/amber-java-hitec-1.0-SNAPSHOT.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
