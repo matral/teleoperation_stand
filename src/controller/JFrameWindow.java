@@ -466,9 +466,11 @@ public class JFrameWindow extends javax.swing.JFrame {
 	}
 	
 	public void addArmControllerName(String controllerName) {
+		
 		jComboBox_armControllers.addItem(controllerName);
 	}
 	public void removeArmControllerName(String controllerName){
+		
 		jComboBox_armControllers.removeItem(controllerName);
 	}
 

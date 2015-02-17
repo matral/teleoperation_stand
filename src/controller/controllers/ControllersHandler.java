@@ -1,5 +1,7 @@
 package controller.controllers;
 
+
+
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.io.IOException;
@@ -17,7 +19,7 @@ import net.java.games.input.Component.Identifier;
 import net.java.games.input.Controller;
 import net.java.games.input.ControllerEnvironment;
 import pl.edu.agh.amber.common.AmberClient;
-import src.main.java.pl.edu.agh.amber.hitec.*;
+import pl.edu.agh.amber.hitec.HitecProxy;
 import pl.edu.agh.amber.roboclaw.RoboclawProxy;
 import Leap.LeapListener;
 import Maestro.PololuConnector;
@@ -32,9 +34,7 @@ import com.leapmotion.leap.Vector;
 import com.thalmic.myo.DeviceListener;
 import com.thalmic.myo.Hub;
 import com.thalmic.myo.Myo;
-import com.thalmic.myo.enums.StreamEmgType;
 import com.thalmic.myo.example.DataCollector;
-import com.thalmic.myo.example.EmgDataCollector;
 
 import controller.JFrameWindow;
 import controller.util.ActualArmControllerDevice;
@@ -58,16 +58,21 @@ public class ControllersHandler {
 	private ActualArmControllerDevice actualArmControllerDevice = ActualArmControllerDevice.KEYBOARD;
 	private ArrayList<Controller> carControllersList;
 	private int[] directionOfEachServo = { 0, 0, 0, 0, 0, 0 };
+	
+	private int sleep;
 
 	private ServosPositions servosPositions;
 
 	public ControllersHandler() {
+		
 		window = new JFrameWindow(this);
-
+		
+		sleep = 5;
 		carControllersList = new ArrayList<>();
 		searchForCarControllers();
+		
 		searchForArmControllers();
-
+		
 		startShowingControllerData();
 	}
 
@@ -77,7 +82,9 @@ public class ControllersHandler {
 				leapController.removeListener(leapListener);
 			}
 		}
-		setKeyboardSpeed(25, 25);
+		sleep = 5;
+		int keyboardSpeed = 13; 
+		setSpeed(keyboardSpeed);
 		Controller[] controllers = ControllerEnvironment
 				.getDefaultEnvironment().getControllers();
 		for (int i = 0; i < controllers.length; i++) {
@@ -112,14 +119,14 @@ public class ControllersHandler {
 	}
 
 	private void activateLeapForArm() {
-		setLeapSpeed();
+		sleep = 40;
+		int leapSpeed =30;
+		setSpeed(leapSpeed);
 		leapListener = new LeapListener();
 		if (leapController == null) {
 			leapController = new com.leapmotion.leap.Controller();
-
-			leapController.addListener(leapListener);
 		}
-
+		// leapController.addListener(leapListener);
 	}
 
 	private void activateMyoForArm() {
@@ -153,7 +160,9 @@ public class ControllersHandler {
 	}
 
 	private void searchForArmControllers() {
+		//System.out.println("1");
 		registerKeyboardForArm();
+		
 		registerLeapForArm();
 		// registerMyoForArm();
 		// registerPhantomForArm();
@@ -264,7 +273,13 @@ public class ControllersHandler {
 				ServosInitialValues.CATCHER.getInitialPosition());
 	}
 
-	private void setKeyboardSpeed(int speed, int acceleration) {
+	private void setSpeed(int speed) {
+		for (Servo servo : Servo.values()) {
+			PololuConnector.setSpeed(speed, servo.getServoPort());
+		}
+
+	}
+	private void setSpeed(int speed, int acceleration) {
 		for (Servo servo : Servo.values()) {
 			PololuConnector.setSpeed(speed, servo.getServoPort());
 			PololuConnector.setAcceleration(acceleration, servo.getServoPort());
@@ -272,13 +287,7 @@ public class ControllersHandler {
 
 	}
 
-	private void setLeapSpeed() {
-		for (Servo servo : Servo.values()) {
-			PololuConnector.setSpeed(10, servo.getServoPort());
-			PololuConnector.setAcceleration(10, servo.getServoPort());
-		}
 
-	}
 
 	public void setListeners() {
 		String controllerName = window.getSelectedArmDevicesName();
@@ -299,20 +308,20 @@ public class ControllersHandler {
 		}
 	}
 
-	private void updateArm() {
+	private void updateArm(ConnectionBuilder connection) {
 		String controllerName = window.getSelectedArmDevicesName();
 		switch (controllerName) {
 		case "keyboard":
-			updateArmKeyboard();
+			updateArmKeyboard(connection);
 			break;
 		case "leap":
-			updateArmLeap();
+			updateArmLeap(connection);
 			break;
 		/*
 		 * case "myo": updateArmMyo(); break;
 		 */
 		case "phantom":
-			updateArmLeap();
+			//updateArmLeap();
 			break;
 		}
 
@@ -326,10 +335,9 @@ public class ControllersHandler {
 
 	}
 
-	private void updateArmLeap() {
+	private void updateArmLeap(ConnectionBuilder connection) {
 		if (leapController != null) {
 			Frame frame = leapController.frame();
-
 			if (!frame.hands().isEmpty()) {
 				// Get the first hand
 				Hand hand = frame.hands().get(0);
@@ -366,27 +374,31 @@ public class ControllersHandler {
 				if (!fingers.isEmpty()) {
 
 					Vector avgPos = Vector.zero();
-					int fingersCount = 2;
-					for (int i = 2; i < 4; i++) {
-						avgPos = avgPos.plus(fingers.get(2).direction());
-						avgPos = avgPos.plus(fingers.get(3).direction());
+					int fingersCount = 0;
+					for (int i = 1; i < 3; i++) {
+						avgPos = avgPos.plus(fingers.get(i).direction());
+						fingersCount +=1;
 					}
-
+					
 					avgPos = avgPos.divide(fingersCount);
 					System.out.println(avgPos);
-					/*
-					 * setServos( hand.palmPosition().getX(),
-					 * hand.palmPosition().getY(), hand.palmPosition().getZ(),
-					 * direction.pitch(), normal.roll(), avgPos.getY(),
-					 * fingers.get(2).tipPosition()
-					 * .distanceTo(fingers.get(3).tipPosition()));
-					 */
+
+					leapListener.setServos(
+							hand.palmPosition().getX(),
+							hand.palmPosition().getY(),
+							hand.palmPosition().getZ(),
+							direction.pitch(),
+							normal.roll(),
+							avgPos.getY(),
+							fingers.get(2).tipPosition()
+									.distanceTo(fingers.get(3).tipPosition()),connection);
+
 				}
 			}
 		}
 	}
 
-	private void updateArmKeyboard() {
+	private void updateArmKeyboard(ConnectionBuilder connection) {
 
 		int[] keys_arm = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 		Controller controller_arm = keyboardArmController;
@@ -436,10 +448,10 @@ public class ControllersHandler {
 					case "G":
 						keys_arm[3] = 1;
 						break;
-					case "H":
+					case "U":
 						keys_arm[4] = 1;
 						break;
-					case "U":
+					case "H":
 						keys_arm[5] = 1;
 						break;
 					case "I":
@@ -448,10 +460,10 @@ public class ControllersHandler {
 					case "9":
 						keys_arm[7] = 1;
 						break;
-					case "J":
+					case "K":
 						keys_arm[8] = 1;
 						break;
-					case "K":
+					case "J":
 						keys_arm[9] = 1;
 						break;
 					case "O":
@@ -472,33 +484,40 @@ public class ControllersHandler {
 		}
 		if (controller_arm.getType() == Controller.Type.KEYBOARD) {
 			calculateDirectionOfEachServo(keys_arm);
+			
 			if (keys_arm[0] + keys_arm[1] != 0) {
-				PololuConnector.setTarget(servosPositions.getBottomPosition(),
-						Servo.BOTTOM.getServoPort());
-			}
+				connection.getHitecProxy().setAngle(Servo.BOTTOM.getServoPort(), servosPositions.getBottomPosition());
+				/*PololuConnector.setTarget(servosPositions.getBottomPosition(),
+						Servo.BOTTOM.getServoPort());*/			}
 			if (keys_arm[2] + keys_arm[3] != 0) {
-				PololuConnector.setTarget(servosPositions.getDOF1Position(),
-						Servo.DOF_1.getServoPort());
+				System.out.println(servosPositions.getDOF1Position());
+				connection.getHitecProxy().setAngle(Servo.DOF_1.getServoPort(), servosPositions.getDOF1Position());
+				/*PololuConnector.setTarget(servosPositions.getDOF1Position(),
+						Servo.DOF_1.getServoPort());*/
 			}
 			if (keys_arm[4] + keys_arm[5] != 0) {
-				PololuConnector.setTarget(servosPositions.getDOF2Position(),
-						Servo.DOF_2.getServoPort());
+				connection.getHitecProxy().setAngle(Servo.DOF_2.getServoPort(), servosPositions.getDOF2Position());
+				/*PololuConnector.setTarget(servosPositions.getDOF2Position(),
+						Servo.DOF_2.getServoPort());*/
 			}
 
 			if (keys_arm[6] + keys_arm[7] != 0) {
-				PololuConnector.setTarget(servosPositions.getDOF3Position(),
-						Servo.DOF_3.getServoPort());
+				connection.getHitecProxy().setAngle(Servo.DOF_3.getServoPort(), servosPositions.getDOF3Position());
+				/*PololuConnector.setTarget(servosPositions.getDOF3Position(),
+						Servo.DOF_3.getServoPort());*/
 			}
 
 			if (keys_arm[8] + keys_arm[9] != 0) {
-				PololuConnector.setTarget(
+				connection.getHitecProxy().setAngle(Servo.CATCHER_ROTATOR.getServoPort(), servosPositions.getCatcherRotatorPosition());
+				/*PololuConnector.setTarget(
 						servosPositions.getCatcherRotatorPosition(),
-						Servo.CATCHER_ROTATOR.getServoPort());
+						Servo.CATCHER_ROTATOR.getServoPort());*/
 			}
 
 			if (keys_arm[10] + keys_arm[11] != 0) {
-				PololuConnector.setTarget(servosPositions.getCatcherPosition(),
-						Servo.CATCHER.getServoPort());
+				connection.getHitecProxy().setAngle(Servo.CATCHER.getServoPort(), servosPositions.getCatcherPosition());
+				/*PololuConnector.setTarget(servosPositions.getCatcherPosition(),
+						Servo.CATCHER.getServoPort());*/
 			}
 
 		}
@@ -524,7 +543,7 @@ public class ControllersHandler {
 				Servo.CATCHER.getServoPort());
 	}
 
-	private void updateCar() {
+	private void updateCar(ConnectionBuilder connection, MecanumDriver mecanumDriver) {
 		int[] keys = { 0, 0, 0, 0, 0, 0 };
 
 		// Currently selected controller.
@@ -665,6 +684,8 @@ public class ControllersHandler {
 		window.setXYAxis(xAxisPercentage, yAxisPercentage);
 		// add other axes panel to window.
 		window.addAxisPanel(axesPanel);
+		moveRoboClaws(mecanumDriver, xAxisPercentage, yAxisPercentage,
+					zAxisPercentage,connection );
 	}
 
 	private void startShowingControllerData() {
@@ -680,23 +701,16 @@ public class ControllersHandler {
 		MecanumDriver mecanumDriver = new MecanumDriver();
 
 		initializeArm();
-
+		
+		
 		while (true) {
 
-			updateArm();
-			// updateCar();
-
-			// manipulator controllers
-
-			// Now that we go trough all controller components,
-			// we add butons panel to window,
-
-			// moveRoboClaws(mecanumDriver, xAxisPercentage, yAxisPercentage,
-			// zAxisPercentage, connection);
-
+			updateArm(connection);
+			//updateCar(connection,mecanumDriver);
+			
 			// We have to give processor some rest.
 			try {
-				Thread.sleep(25);
+				Thread.sleep(sleep);
 			} catch (InterruptedException ex) {
 				Logger.getLogger(ControllersHandler.class.getName()).log(
 						Level.SEVERE, null, ex);
@@ -734,9 +748,9 @@ public class ControllersHandler {
 			return 0;
 		} else {
 			if (key == 1)
-				return -40;
+				return -1;
 			else
-				return 40;
+				return 1;
 		}
 	}
 

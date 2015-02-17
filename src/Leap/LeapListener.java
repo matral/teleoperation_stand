@@ -16,12 +16,14 @@ import com.leapmotion.leap.Listener;
 import com.leapmotion.leap.Vector;
 
 import controller.JFrameWindow;
+import controller.util.ConnectionBuilder;
 
 public class LeapListener extends Listener {
 
 	private int last_armLeftRightRescaled, last_armUpDownRescaled,
 			last_armForwardBackwardRescaled, last_handPitchRescaled,
-			last_handRollRescaled, last_handDistanceOfFingersRescaled;
+			last_handRollRescaled, last_handDistanceOfFingersRescaled,
+			last_handTipYRescaled;
 
 	private double epsilon;
 
@@ -32,7 +34,7 @@ public class LeapListener extends Listener {
 		last_armUpDownRescaled = ServosInitialValues.DOF_1.getInitialPosition();
 		last_armForwardBackwardRescaled = ServosInitialValues.DOF_2
 				.getInitialPosition();
-		last_handPitchRescaled = ServosInitialValues.DOF_3.getInitialPosition();
+		last_handTipYRescaled = ServosInitialValues.DOF_3.getInitialPosition();
 		last_handRollRescaled = ServosInitialValues.CATCHER_ROTATOR
 				.getInitialPosition();
 		last_handDistanceOfFingersRescaled = ServosInitialValues.CATCHER
@@ -91,8 +93,8 @@ public class LeapListener extends Listener {
 				}
 
 				avgPos = avgPos.divide(fingersCount);
-				
-				setServos(
+
+				/*setServos(
 						hand.palmPosition().getX(),
 						hand.palmPosition().getY(),
 						hand.palmPosition().getZ(),
@@ -100,7 +102,7 @@ public class LeapListener extends Listener {
 						normal.roll(),
 						avgPos.getY(),
 						fingers.get(2).tipPosition()
-								.distanceTo(fingers.get(3).tipPosition()));
+								.distanceTo(fingers.get(3).tipPosition()));*/
 			}
 		}
 
@@ -108,10 +110,10 @@ public class LeapListener extends Listener {
 
 	public void setServos(float armLeftRight, float armUpDown,
 			float armForwardBackward, double handPitch, double handRoll,
-			double fingerTipsY, double distanceOfFingers) {
+			double fingerTipsY, double distanceOfFingers, ConnectionBuilder connection) {
 		// Min Values must be smaller than Max values
 		boolean revert = true;
-		System.out.println("finger distance : " +distanceOfFingers);
+		System.out.println("finger distance : " + distanceOfFingers);
 		int armLeftRightRescaled = ServosPositionsCalulations
 				.rescaleAndCheckEpsilonEcxeeding(armLeftRight,
 						LeapMinMaxes.ARM_LEFT_RIGHT.getAttributeMinValue(),
@@ -119,7 +121,7 @@ public class LeapListener extends Listener {
 						ServoBoundaries.BOTTOM.getServoMinValue(),
 						ServoBoundaries.BOTTOM.getServoMaxValue(),
 						last_armLeftRightRescaled,
-						ServoBoundaries.BOTTOM.getServoEpsilon(),revert);
+						ServoBoundaries.BOTTOM.getServoEpsilon());
 
 		int armUpDownRescaled = ServosPositionsCalulations
 				.rescaleAndCheckEpsilonEcxeeding(armUpDown,
@@ -128,7 +130,7 @@ public class LeapListener extends Listener {
 						ServoBoundaries.DOF_1.getServoMinValue(),
 						ServoBoundaries.DOF_1.getServoMaxValue(),
 						last_armUpDownRescaled,
-						ServoBoundaries.DOF_1.getServoEpsilon(),revert);
+						ServoBoundaries.DOF_1.getServoEpsilon());
 
 		int armForwardBackwardRescaled = ServosPositionsCalulations
 				.rescaleAndCheckEpsilonEcxeeding(armForwardBackward,
@@ -139,9 +141,9 @@ public class LeapListener extends Listener {
 						last_armForwardBackwardRescaled,
 						ServoBoundaries.DOF_2.getServoEpsilon());
 		int handTipYRescaled = ServosPositionsCalulations
-				.rescaleAndCheckEpsilonEcxeeding(fingerTipsY,
-						LeapMinMaxes.TIPS_Y.getAttributeMinValue(),
-						LeapMinMaxes.TIPS_Y.getAttributeMaxValue(),
+				.rescaleAndCheckEpsilonEcxeeding(handPitch,
+						LeapMinMaxes.PITCH.getAttributeMinValue(),
+						LeapMinMaxes.PITCH.getAttributeMaxValue(),
 						ServoBoundaries.DOF_3.getServoMinValue(),
 						ServoBoundaries.DOF_3.getServoMaxValue(),
 						last_handPitchRescaled,
@@ -152,7 +154,7 @@ public class LeapListener extends Listener {
 						LeapMinMaxes.ROLL.getAttributeMaxValue(),
 						ServoBoundaries.CATCHER_ROTATOR.getServoMinValue(),
 						ServoBoundaries.CATCHER_ROTATOR.getServoMaxValue(),
-						last_handRollRescaled,
+						last_handTipYRescaled,
 						ServoBoundaries.CATCHER_ROTATOR.getServoEpsilon());
 		int handDistanceOfFingersRescaled = ServosPositionsCalulations
 				.rescaleAndCheckEpsilonEcxeeding(distanceOfFingers,
@@ -162,17 +164,42 @@ public class LeapListener extends Listener {
 						ServoBoundaries.CATCHER.getServoMaxValue(),
 						last_handDistanceOfFingersRescaled,
 						ServoBoundaries.CATCHER.getServoEpsilon());
-		PololuConnector.setTarget(armLeftRightRescaled,
-				Servo.BOTTOM.getServoPort());
-		PololuConnector
-				.setTarget(armUpDownRescaled, Servo.DOF_1.getServoPort());
-		PololuConnector.setTarget(armForwardBackwardRescaled,
-				Servo.DOF_2.getServoPort());
-		PololuConnector.setTarget(handTipYRescaled, Servo.DOF_3.getServoPort());
-		PololuConnector.setTarget(handRollRescaled,
-				Servo.CATCHER_ROTATOR.getServoPort());
-		PololuConnector.setTarget(handDistanceOfFingersRescaled,
-				Servo.CATCHER.getServoPort());
+		if (last_armLeftRightRescaled != armLeftRightRescaled) {
+			/*PololuConnector.setTarget(armLeftRightRescaled,
+					Servo.BOTTOM.getServoPort());*/
+			connection.getHitecProxy().setAngle(Servo.BOTTOM.getServoPort(), armLeftRightRescaled);
+			last_armLeftRightRescaled = armLeftRightRescaled;
+		}
+		if (last_armUpDownRescaled != armUpDownRescaled) {
+			/*PololuConnector.setTarget(armUpDownRescaled,
+					Servo.DOF_1.getServoPort());*/
+			connection.getHitecProxy().setAngle(Servo.DOF_1.getServoPort(), armUpDownRescaled);
+			last_armUpDownRescaled = armUpDownRescaled;
+		}
+		if (last_armForwardBackwardRescaled != armForwardBackward) {
+			/*PololuConnector.setTarget(armForwardBackwardRescaled,
+					Servo.DOF_2.getServoPort());*/
+			connection.getHitecProxy().setAngle(Servo.DOF_2.getServoPort(), armForwardBackwardRescaled);
+			last_armForwardBackwardRescaled = armForwardBackwardRescaled;
+		}
+		if (last_handTipYRescaled != handTipYRescaled) {
+			/*PololuConnector.setTarget(handTipYRescaled,
+					Servo.DOF_3.getServoPort());*/
+			connection.getHitecProxy().setAngle(Servo.DOF_3.getServoPort(), handTipYRescaled);
+			last_handTipYRescaled = handTipYRescaled;
+		}
+		if (last_handRollRescaled != handRollRescaled) {
+			/*PololuConnector.setTarget(handRollRescaled,
+					Servo.CATCHER_ROTATOR.getServoPort());*/
+			connection.getHitecProxy().setAngle(Servo.CATCHER_ROTATOR.getServoPort(), handRollRescaled);
+			last_handRollRescaled = handRollRescaled;
+		}
+		if (last_handDistanceOfFingersRescaled != handDistanceOfFingersRescaled) {
+			/*PololuConnector.setTarget(handDistanceOfFingersRescaled,
+					Servo.CATCHER.getServoPort());*/
+			connection.getHitecProxy().setAngle(Servo.CATCHER.getServoPort(), handDistanceOfFingersRescaled);
+			last_handDistanceOfFingersRescaled = handDistanceOfFingersRescaled;
+		}
 
 	}
 }

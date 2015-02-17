@@ -1,7 +1,7 @@
 package controller.util;
 
 import pl.edu.agh.amber.common.AmberClient;
-import src.main.java.pl.edu.agh.amber.hitec.*;
+import pl.edu.agh.amber.hitec.HitecProxy;
 import pl.edu.agh.amber.roboclaw.RoboclawProxy;
 
 public class ConnectionBuilder {
