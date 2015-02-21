@@ -1,14 +1,14 @@
 package controller.controllers;
 
-
-
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.GridLayout;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
@@ -22,6 +22,7 @@ import pl.edu.agh.amber.common.AmberClient;
 import pl.edu.agh.amber.hitec.HitecProxy;
 import pl.edu.agh.amber.roboclaw.RoboclawProxy;
 import Leap.LeapListener;
+import Leap.StaticLeapMinMaxes;
 import Maestro.PololuConnector;
 import Maestro.Servo;
 import Maestro.ServosInitialValues;
@@ -50,7 +51,7 @@ public class ControllersHandler {
 	private Controller keyboardArmController = null;
 	com.leapmotion.leap.Controller leapController = null;
 	private LeapListener leapListener;
-
+	private boolean isDebugEnabled = true;
 	private Hub myoController = null;
 	private DeviceListener myoListener;
 
@@ -58,21 +59,21 @@ public class ControllersHandler {
 	private ActualArmControllerDevice actualArmControllerDevice = ActualArmControllerDevice.KEYBOARD;
 	private ArrayList<Controller> carControllersList;
 	private int[] directionOfEachServo = { 0, 0, 0, 0, 0, 0 };
-	
+
 	private int sleep;
 
 	private ServosPositions servosPositions;
 
 	public ControllersHandler() {
-		
+
 		window = new JFrameWindow(this);
-		
+
 		sleep = 5;
 		carControllersList = new ArrayList<>();
 		searchForCarControllers();
-		
+
 		searchForArmControllers();
-		
+
 		startShowingControllerData();
 	}
 
@@ -83,7 +84,7 @@ public class ControllersHandler {
 			}
 		}
 		sleep = 5;
-		int keyboardSpeed = 13; 
+		int keyboardSpeed = 13;
 		setSpeed(keyboardSpeed);
 		Controller[] controllers = ControllerEnvironment
 				.getDefaultEnvironment().getControllers();
@@ -120,12 +121,14 @@ public class ControllersHandler {
 
 	private void activateLeapForArm() {
 		sleep = 40;
-		int leapSpeed =30;
+		int leapSpeed = 30;
 		setSpeed(leapSpeed);
 		leapListener = new LeapListener();
 		if (leapController == null) {
 			leapController = new com.leapmotion.leap.Controller();
-		}
+		};
+		leapListener.setLipMinMaxesHardcoredValues();
+		window.setArmLeapCheckBox();
 		// leapController.addListener(leapListener);
 	}
 
@@ -160,9 +163,9 @@ public class ControllersHandler {
 	}
 
 	private void searchForArmControllers() {
-		//System.out.println("1");
+		// System.out.println("1");
 		registerKeyboardForArm();
-		
+
 		registerLeapForArm();
 		// registerMyoForArm();
 		// registerPhantomForArm();
@@ -279,6 +282,7 @@ public class ControllersHandler {
 		}
 
 	}
+
 	private void setSpeed(int speed, int acceleration) {
 		for (Servo servo : Servo.values()) {
 			PololuConnector.setSpeed(speed, servo.getServoPort());
@@ -286,8 +290,6 @@ public class ControllersHandler {
 		}
 
 	}
-
-
 
 	public void setListeners() {
 		String controllerName = window.getSelectedArmDevicesName();
@@ -321,7 +323,7 @@ public class ControllersHandler {
 		 * case "myo": updateArmMyo(); break;
 		 */
 		case "phantom":
-			//updateArmLeap();
+			// updateArmLeap();
 			break;
 		}
 
@@ -337,10 +339,11 @@ public class ControllersHandler {
 
 	private void updateArmLeap(ConnectionBuilder connection) {
 		if (leapController != null) {
+
 			Frame frame = leapController.frame();
 			if (!frame.hands().isEmpty()) {
 				// Get the first hand
-				Hand hand = frame.hands().get(0);
+				Hand hand = frame.hands().rightmost();
 
 				// Check if the hand has any fingers
 				FingerList fingers = hand.fingers();
@@ -355,43 +358,74 @@ public class ControllersHandler {
 
 				}
 				// Get the hand's sphere radius and palm position
-				System.out
-						.println("Hand sphere radius: " + hand.sphereCenter());
-				System.out.println("left-right: " + hand.palmPosition().getX()
-						+ "up-down: " + hand.palmPosition().getY()
-						+ "forward-backward: " + -hand.palmPosition().getZ());
+				if (isDebugEnabled) {
+					System.out.println("Hand sphere radius: "
+							+ hand.sphereCenter());
+					System.out.println("left-right: "
+							+ hand.palmPosition().getX() + "up-down: "
+							+ hand.palmPosition().getY() + "forward-backward: "
+							+ -hand.palmPosition().getZ());
+				}
 
 				// Get the hand's normal vector and direction
 				Vector normal = hand.palmNormal();
 				Vector direction = hand.direction();
 
 				// Calculate the hand's pitch, roll, and yaw angles
-				System.out.println("Hand pitch: " + direction.pitch()
-						+ " degrees, " + "roll: " + normal.roll()
-						+ " degrees, " + "yaw: " + direction.yaw()
-						+ " degrees\n");
-
+				if (isDebugEnabled) {
+					System.out.println("Hand pitch: " + direction.pitch()
+							+ " degrees, " + "roll: " + normal.roll()
+							+ " degrees, " + "yaw: " + direction.yaw()
+							+ " degrees\n");
+					System.out.println("finger distance : "
+							+ fingers.get(2).tipPosition()
+									.distanceTo(fingers.get(3).tipPosition()));
+				}
 				if (!fingers.isEmpty()) {
 
 					Vector avgPos = Vector.zero();
 					int fingersCount = 0;
 					for (int i = 1; i < 3; i++) {
 						avgPos = avgPos.plus(fingers.get(i).direction());
-						fingersCount +=1;
+						fingersCount += 1;
 					}
-					
-					avgPos = avgPos.divide(fingersCount);
-					System.out.println(avgPos);
 
-					leapListener.setServos(
-							hand.palmPosition().getX(),
-							hand.palmPosition().getY(),
-							hand.palmPosition().getZ(),
-							direction.pitch(),
-							normal.roll(),
-							avgPos.getY(),
-							fingers.get(2).tipPosition()
-									.distanceTo(fingers.get(3).tipPosition()),connection);
+					avgPos = avgPos.divide(fingersCount);
+					if (isDebugEnabled) {
+						System.out.println(avgPos);
+					}
+					if (leapController.frame().hands().count() == 2
+							&& (leapController.frame().hands().leftmost()
+									.grabStrength() == 1 || leapController
+									.frame().hands().rightmost().grabStrength() == 1)
+							&& !window.areLeapBoundariesHardcoded())
+						leapListener.setLipMinMaxes(
+								hand.palmPosition().getX(),
+								hand.palmPosition().getY(),
+								-hand.palmPosition().getZ(),
+								direction.pitch(),
+								-normal.roll(),
+								avgPos.getY(),
+								fingers.get(2)
+										.tipPosition()
+										.distanceTo(
+												fingers.get(3).tipPosition()));
+					else {
+						leapListener.setLipMinMaxesStaticValues();
+
+						leapListener.setServos(
+								hand.palmPosition().getX(),
+								hand.palmPosition().getY(),
+								-hand.palmPosition().getZ(),
+								direction.pitch(),
+								normal.roll(),
+								-avgPos.getY(),
+								fingers.get(2)
+										.tipPosition()
+										.distanceTo(
+												fingers.get(3).tipPosition()),
+								connection);
+					}
 
 				}
 			}
@@ -484,40 +518,62 @@ public class ControllersHandler {
 		}
 		if (controller_arm.getType() == Controller.Type.KEYBOARD) {
 			calculateDirectionOfEachServo(keys_arm);
-			
+
 			if (keys_arm[0] + keys_arm[1] != 0) {
-				connection.getHitecProxy().setAngle(Servo.BOTTOM.getServoPort(), servosPositions.getBottomPosition());
-				/*PololuConnector.setTarget(servosPositions.getBottomPosition(),
-						Servo.BOTTOM.getServoPort());*/			}
+				System.out.println(servosPositions.getBottomPosition());
+				connection.getHitecProxy().setAngle(
+						Servo.BOTTOM.getServoPort(),
+						servosPositions.getBottomPosition());
+				/*
+				 * PololuConnector.setTarget(servosPositions.getBottomPosition(),
+				 * Servo.BOTTOM.getServoPort());
+				 */}
 			if (keys_arm[2] + keys_arm[3] != 0) {
-				System.out.println(servosPositions.getDOF1Position());
-				connection.getHitecProxy().setAngle(Servo.DOF_1.getServoPort(), servosPositions.getDOF1Position());
-				/*PololuConnector.setTarget(servosPositions.getDOF1Position(),
-						Servo.DOF_1.getServoPort());*/
+
+				connection.getHitecProxy().setAngle(Servo.DOF_1.getServoPort(),
+						servosPositions.getDOF1Position());
+				/*
+				 * PololuConnector.setTarget(servosPositions.getDOF1Position(),
+				 * Servo.DOF_1.getServoPort());
+				 */
 			}
 			if (keys_arm[4] + keys_arm[5] != 0) {
-				connection.getHitecProxy().setAngle(Servo.DOF_2.getServoPort(), servosPositions.getDOF2Position());
-				/*PololuConnector.setTarget(servosPositions.getDOF2Position(),
-						Servo.DOF_2.getServoPort());*/
+				connection.getHitecProxy().setAngle(Servo.DOF_2.getServoPort(),
+						servosPositions.getDOF2Position());
+				/*
+				 * PololuConnector.setTarget(servosPositions.getDOF2Position(),
+				 * Servo.DOF_2.getServoPort());
+				 */
 			}
 
 			if (keys_arm[6] + keys_arm[7] != 0) {
-				connection.getHitecProxy().setAngle(Servo.DOF_3.getServoPort(), servosPositions.getDOF3Position());
-				/*PololuConnector.setTarget(servosPositions.getDOF3Position(),
-						Servo.DOF_3.getServoPort());*/
+				connection.getHitecProxy().setAngle(Servo.DOF_3.getServoPort(),
+						servosPositions.getDOF3Position());
+				/*
+				 * PololuConnector.setTarget(servosPositions.getDOF3Position(),
+				 * Servo.DOF_3.getServoPort());
+				 */
 			}
 
 			if (keys_arm[8] + keys_arm[9] != 0) {
-				connection.getHitecProxy().setAngle(Servo.CATCHER_ROTATOR.getServoPort(), servosPositions.getCatcherRotatorPosition());
-				/*PololuConnector.setTarget(
-						servosPositions.getCatcherRotatorPosition(),
-						Servo.CATCHER_ROTATOR.getServoPort());*/
+				connection.getHitecProxy().setAngle(
+						Servo.CATCHER_ROTATOR.getServoPort(),
+						servosPositions.getCatcherRotatorPosition());
+				/*
+				 * PololuConnector.setTarget(
+				 * servosPositions.getCatcherRotatorPosition(),
+				 * Servo.CATCHER_ROTATOR.getServoPort());
+				 */
 			}
 
 			if (keys_arm[10] + keys_arm[11] != 0) {
-				connection.getHitecProxy().setAngle(Servo.CATCHER.getServoPort(), servosPositions.getCatcherPosition());
-				/*PololuConnector.setTarget(servosPositions.getCatcherPosition(),
-						Servo.CATCHER.getServoPort());*/
+				connection.getHitecProxy().setAngle(
+						Servo.CATCHER.getServoPort(),
+						servosPositions.getCatcherPosition());
+				/*
+				 * PololuConnector.setTarget(servosPositions.getCatcherPosition()
+				 * , Servo.CATCHER.getServoPort());
+				 */
 			}
 
 		}
@@ -543,7 +599,8 @@ public class ControllersHandler {
 				Servo.CATCHER.getServoPort());
 	}
 
-	private void updateCar(ConnectionBuilder connection, MecanumDriver mecanumDriver) {
+	private void updateCar(ConnectionBuilder connection,
+			MecanumDriver mecanumDriver) {
 		int[] keys = { 0, 0, 0, 0, 0, 0 };
 
 		// Currently selected controller.
@@ -685,7 +742,7 @@ public class ControllersHandler {
 		// add other axes panel to window.
 		window.addAxisPanel(axesPanel);
 		moveRoboClaws(mecanumDriver, xAxisPercentage, yAxisPercentage,
-					zAxisPercentage,connection );
+				zAxisPercentage, connection);
 	}
 
 	private void startShowingControllerData() {
@@ -701,13 +758,12 @@ public class ControllersHandler {
 		MecanumDriver mecanumDriver = new MecanumDriver();
 
 		initializeArm();
-		
-		
+
 		while (true) {
 
 			updateArm(connection);
-			//updateCar(connection,mecanumDriver);
-			
+			// updateCar(connection,mecanumDriver);
+
 			// We have to give processor some rest.
 			try {
 				Thread.sleep(sleep);

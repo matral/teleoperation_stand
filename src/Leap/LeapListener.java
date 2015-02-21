@@ -94,15 +94,13 @@ public class LeapListener extends Listener {
 
 				avgPos = avgPos.divide(fingersCount);
 
-				/*setServos(
-						hand.palmPosition().getX(),
-						hand.palmPosition().getY(),
-						hand.palmPosition().getZ(),
-						direction.pitch(),
-						normal.roll(),
-						avgPos.getY(),
-						fingers.get(2).tipPosition()
-								.distanceTo(fingers.get(3).tipPosition()));*/
+				/*
+				 * setServos( hand.palmPosition().getX(),
+				 * hand.palmPosition().getY(), hand.palmPosition().getZ(),
+				 * direction.pitch(), normal.roll(), avgPos.getY(),
+				 * fingers.get(2).tipPosition()
+				 * .distanceTo(fingers.get(3).tipPosition()));
+				 */
 			}
 		}
 
@@ -110,10 +108,11 @@ public class LeapListener extends Listener {
 
 	public void setServos(float armLeftRight, float armUpDown,
 			float armForwardBackward, double handPitch, double handRoll,
-			double fingerTipsY, double distanceOfFingers, ConnectionBuilder connection) {
+			double fingerTipsY, double distanceOfFingers,
+			ConnectionBuilder connection) {
 		// Min Values must be smaller than Max values
 		boolean revert = true;
-		System.out.println("finger distance : " + distanceOfFingers);
+
 		int armLeftRightRescaled = ServosPositionsCalulations
 				.rescaleAndCheckEpsilonEcxeeding(armLeftRight,
 						LeapMinMaxes.ARM_LEFT_RIGHT.getAttributeMinValue(),
@@ -140,14 +139,14 @@ public class LeapListener extends Listener {
 						ServoBoundaries.DOF_2.getServoMaxValue(),
 						last_armForwardBackwardRescaled,
 						ServoBoundaries.DOF_2.getServoEpsilon());
-		int handTipYRescaled = ServosPositionsCalulations
+		int handPitchRescaled = ServosPositionsCalulations
 				.rescaleAndCheckEpsilonEcxeeding(handPitch,
 						LeapMinMaxes.PITCH.getAttributeMinValue(),
 						LeapMinMaxes.PITCH.getAttributeMaxValue(),
 						ServoBoundaries.DOF_3.getServoMinValue(),
 						ServoBoundaries.DOF_3.getServoMaxValue(),
 						last_handPitchRescaled,
-						ServoBoundaries.DOF_3.getServoEpsilon());
+						ServoBoundaries.DOF_3.getServoEpsilon(), revert);
 		int handRollRescaled = ServosPositionsCalulations
 				.rescaleAndCheckEpsilonEcxeeding(handRoll,
 						LeapMinMaxes.ROLL.getAttributeMinValue(),
@@ -163,43 +162,231 @@ public class LeapListener extends Listener {
 						ServoBoundaries.CATCHER.getServoMinValue(),
 						ServoBoundaries.CATCHER.getServoMaxValue(),
 						last_handDistanceOfFingersRescaled,
-						ServoBoundaries.CATCHER.getServoEpsilon());
+						ServoBoundaries.CATCHER.getServoEpsilon(), revert);
 		if (last_armLeftRightRescaled != armLeftRightRescaled) {
-			/*PololuConnector.setTarget(armLeftRightRescaled,
-					Servo.BOTTOM.getServoPort());*/
-			connection.getHitecProxy().setAngle(Servo.BOTTOM.getServoPort(), armLeftRightRescaled);
+			/*
+			 * PololuConnector.setTarget(armLeftRightRescaled,
+			 * Servo.BOTTOM.getServoPort());
+			 */
+			connection.getHitecProxy().setAngle(Servo.BOTTOM.getServoPort(),
+					armLeftRightRescaled);
 			last_armLeftRightRescaled = armLeftRightRescaled;
 		}
 		if (last_armUpDownRescaled != armUpDownRescaled) {
-			/*PololuConnector.setTarget(armUpDownRescaled,
-					Servo.DOF_1.getServoPort());*/
-			connection.getHitecProxy().setAngle(Servo.DOF_1.getServoPort(), armUpDownRescaled);
+			/*
+			 * PololuConnector.setTarget(armUpDownRescaled,
+			 * Servo.DOF_1.getServoPort());
+			 */
+			connection.getHitecProxy().setAngle(Servo.DOF_1.getServoPort(),
+					armUpDownRescaled);
 			last_armUpDownRescaled = armUpDownRescaled;
 		}
 		if (last_armForwardBackwardRescaled != armForwardBackward) {
-			/*PololuConnector.setTarget(armForwardBackwardRescaled,
-					Servo.DOF_2.getServoPort());*/
-			connection.getHitecProxy().setAngle(Servo.DOF_2.getServoPort(), armForwardBackwardRescaled);
+			/*
+			 * PololuConnector.setTarget(armForwardBackwardRescaled,
+			 * Servo.DOF_2.getServoPort());
+			 */
+			connection.getHitecProxy().setAngle(Servo.DOF_2.getServoPort(),
+					armForwardBackwardRescaled);
 			last_armForwardBackwardRescaled = armForwardBackwardRescaled;
 		}
-		if (last_handTipYRescaled != handTipYRescaled) {
-			/*PololuConnector.setTarget(handTipYRescaled,
-					Servo.DOF_3.getServoPort());*/
-			connection.getHitecProxy().setAngle(Servo.DOF_3.getServoPort(), handTipYRescaled);
-			last_handTipYRescaled = handTipYRescaled;
+		if (last_handPitchRescaled != handPitchRescaled) {
+			/*
+			 * PololuConnector.setTarget(handPitchRescaled,
+			 * Servo.DOF_3.getServoPort());
+			 */
+			connection.getHitecProxy().setAngle(Servo.DOF_3.getServoPort(),
+					handPitchRescaled);
+			last_handPitchRescaled = handPitchRescaled;
 		}
 		if (last_handRollRescaled != handRollRescaled) {
-			/*PololuConnector.setTarget(handRollRescaled,
-					Servo.CATCHER_ROTATOR.getServoPort());*/
-			connection.getHitecProxy().setAngle(Servo.CATCHER_ROTATOR.getServoPort(), handRollRescaled);
+			/*
+			 * PololuConnector.setTarget(handRollRescaled,
+			 * Servo.CATCHER_ROTATOR.getServoPort());
+			 */
+			connection.getHitecProxy().setAngle(
+					Servo.CATCHER_ROTATOR.getServoPort(), handRollRescaled);
 			last_handRollRescaled = handRollRescaled;
 		}
 		if (last_handDistanceOfFingersRescaled != handDistanceOfFingersRescaled) {
-			/*PololuConnector.setTarget(handDistanceOfFingersRescaled,
-					Servo.CATCHER.getServoPort());*/
-			connection.getHitecProxy().setAngle(Servo.CATCHER.getServoPort(), handDistanceOfFingersRescaled);
+			/*
+			 * PololuConnector.setTarget(handDistanceOfFingersRescaled,
+			 * Servo.CATCHER.getServoPort());
+			 */
+			connection.getHitecProxy().setAngle(Servo.CATCHER.getServoPort(),
+					handDistanceOfFingersRescaled);
 			last_handDistanceOfFingersRescaled = handDistanceOfFingersRescaled;
 		}
+
+	}
+
+	public void setLipMinMaxes(float armLeftRight, float armUpDown,
+			float armForwardBackward, double handPitch, double handRoll,
+			double fingerTipsY, double distanceOfFingers) {
+		System.out.println("Adjusting leap min maxes");
+		System.out.println("Arm left : "
+				+ LeapMinMaxes.ARM_LEFT_RIGHT.getAttributeMinValue()
+				+ "Arm right : "
+				+ LeapMinMaxes.ARM_LEFT_RIGHT.getAttributeMaxValue());
+		System.out.println("Arm down : "
+				+ LeapMinMaxes.ARM_UP_DOWN.getAttributeMinValue() + "Arm up : "
+				+ LeapMinMaxes.ARM_UP_DOWN.getAttributeMaxValue());
+		System.out.println("Arm back : "
+				+ LeapMinMaxes.ARM_FRONT_BACK.getAttributeMinValue()
+				+ "Arm front : "
+				+ LeapMinMaxes.ARM_FRONT_BACK.getAttributeMaxValue());
+		System.out.println("Arm pitch min : "
+				+ LeapMinMaxes.PITCH.getAttributeMinValue()
+				+ "Arm pitch max : "
+				+ LeapMinMaxes.PITCH.getAttributeMaxValue());
+		System.out.println("Arm roll min : "
+				+ LeapMinMaxes.ROLL.getAttributeMinValue() + "Arm roll max : "
+				+ LeapMinMaxes.ROLL.getAttributeMaxValue());
+		System.out.println("Finger distance min : "
+				+ LeapMinMaxes.FINGERS_DISTANCE.getAttributeMinValue()
+				+ "Finger distance max : "
+				+ LeapMinMaxes.FINGERS_DISTANCE.getAttributeMaxValue());
+
+		if (armLeftRight > LeapMinMaxes.ARM_LEFT_RIGHT.getStaticMaxValue()) {
+			LeapMinMaxes.ARM_LEFT_RIGHT.setAttributeMaxValue(armLeftRight);
+			LeapMinMaxes.ARM_LEFT_RIGHT.setStaticMaxValue(armLeftRight);
+		}
+		if (armLeftRight < LeapMinMaxes.ARM_LEFT_RIGHT.getStaticMinValue()) {
+			LeapMinMaxes.ARM_LEFT_RIGHT.setAttributeMinValue(armLeftRight);
+			LeapMinMaxes.ARM_LEFT_RIGHT.setStaticMinValue(armLeftRight);
+		}
+
+		if (armForwardBackward > LeapMinMaxes.ARM_FRONT_BACK
+				.getStaticMaxValue()) {
+			LeapMinMaxes.ARM_FRONT_BACK
+					.setAttributeMaxValue(armForwardBackward);
+			LeapMinMaxes.ARM_FRONT_BACK.setStaticMaxValue(armForwardBackward);
+		}
+		if (armForwardBackward < LeapMinMaxes.ARM_FRONT_BACK
+				.getStaticMinValue()) {
+			LeapMinMaxes.ARM_FRONT_BACK
+					.setAttributeMinValue(armForwardBackward);
+			LeapMinMaxes.ARM_FRONT_BACK.setStaticMinValue(armForwardBackward);
+		}
+		if (armUpDown > LeapMinMaxes.ARM_UP_DOWN.getStaticMaxValue()) {
+			LeapMinMaxes.ARM_UP_DOWN.setAttributeMaxValue(armUpDown);
+			LeapMinMaxes.ARM_UP_DOWN.setStaticMaxValue(armUpDown);
+		}
+		if (armUpDown < LeapMinMaxes.ARM_UP_DOWN.getStaticMinValue()) {
+			LeapMinMaxes.ARM_UP_DOWN.setAttributeMinValue(armUpDown);
+			LeapMinMaxes.ARM_UP_DOWN.setStaticMinValue(armUpDown);
+		}
+		if (handRoll > LeapMinMaxes.ROLL.getStaticMaxValue()) {
+			LeapMinMaxes.ROLL.setAttributeMaxValue(handRoll);
+			LeapMinMaxes.ROLL.setStaticMaxValue(handRoll);
+		}
+		if (handRoll < LeapMinMaxes.ROLL.getStaticMinValue()) {
+			LeapMinMaxes.ROLL.setAttributeMinValue(handRoll);
+			LeapMinMaxes.ROLL.setStaticMinValue(handRoll);
+		}
+		if (handPitch > LeapMinMaxes.PITCH.getStaticMaxValue()) {
+			LeapMinMaxes.PITCH.setAttributeMaxValue(handPitch);
+			LeapMinMaxes.PITCH.setStaticMaxValue(handPitch);
+		}
+		if (handPitch < LeapMinMaxes.PITCH.getStaticMinValue()) {
+			LeapMinMaxes.PITCH.setAttributeMinValue(handPitch);
+			LeapMinMaxes.PITCH.setStaticMinValue(handPitch);
+		}
+
+		if (distanceOfFingers > LeapMinMaxes.FINGERS_DISTANCE
+				.getStaticMaxValue()) {
+			LeapMinMaxes.FINGERS_DISTANCE
+					.setAttributeMaxValue(distanceOfFingers);
+			LeapMinMaxes.FINGERS_DISTANCE.setStaticMaxValue(distanceOfFingers);
+		}
+		if (distanceOfFingers < LeapMinMaxes.FINGERS_DISTANCE
+				.getStaticMinValue()) {
+			LeapMinMaxes.FINGERS_DISTANCE
+					.setAttributeMinValue(distanceOfFingers);
+			LeapMinMaxes.FINGERS_DISTANCE.setStaticMinValue(distanceOfFingers);
+		}
+
+	}
+
+	public void setLipMinMaxesStaticValues() {
+		LeapMinMaxes.ARM_LEFT_RIGHT
+				.setStaticMinValue(StaticLeapMinMaxes.ARM_LEFT_RIGHT
+						.getAttributeMinValue());
+		LeapMinMaxes.ARM_LEFT_RIGHT
+				.setStaticMaxValue(StaticLeapMinMaxes.ARM_LEFT_RIGHT
+						.getAttributeMaxValue());
+
+		LeapMinMaxes.ARM_FRONT_BACK
+				.setStaticMinValue(StaticLeapMinMaxes.ARM_FRONT_BACK
+						.getAttributeMinValue());
+		LeapMinMaxes.ARM_FRONT_BACK
+				.setStaticMaxValue(StaticLeapMinMaxes.ARM_FRONT_BACK
+						.getAttributeMaxValue());
+
+		LeapMinMaxes.ARM_UP_DOWN
+				.setStaticMinValue(StaticLeapMinMaxes.ARM_UP_DOWN
+						.getAttributeMinValue());
+		LeapMinMaxes.ARM_UP_DOWN
+				.setStaticMaxValue(StaticLeapMinMaxes.ARM_UP_DOWN
+						.getAttributeMaxValue());
+
+		LeapMinMaxes.PITCH.setStaticMinValue(StaticLeapMinMaxes.PITCH
+				.getAttributeMinValue());
+		LeapMinMaxes.PITCH.setStaticMaxValue(StaticLeapMinMaxes.PITCH
+				.getAttributeMaxValue());
+
+		LeapMinMaxes.ROLL.setStaticMinValue(StaticLeapMinMaxes.ROLL
+				.getAttributeMinValue());
+		LeapMinMaxes.ROLL.setStaticMaxValue(StaticLeapMinMaxes.ROLL
+				.getAttributeMaxValue());
+
+		LeapMinMaxes.FINGERS_DISTANCE
+				.setStaticMinValue(StaticLeapMinMaxes.FINGERS_DISTANCE
+						.getAttributeMinValue());
+		LeapMinMaxes.FINGERS_DISTANCE
+				.setStaticMaxValue(StaticLeapMinMaxes.FINGERS_DISTANCE
+						.getAttributeMaxValue());
+
+	}
+
+	public void setLipMinMaxesHardcoredValues() {
+		LeapMinMaxes.ARM_LEFT_RIGHT
+				.setStaticMinValue(StaticLeapMinMaxes.ARM_LEFT_RIGHT
+						.getHardcoredMinValue());
+		LeapMinMaxes.ARM_LEFT_RIGHT
+				.setStaticMaxValue(StaticLeapMinMaxes.ARM_LEFT_RIGHT
+						.getHardcoredMaxValue());
+
+		LeapMinMaxes.ARM_FRONT_BACK
+				.setStaticMinValue(StaticLeapMinMaxes.ARM_FRONT_BACK
+						.getHardcoredMinValue());
+		LeapMinMaxes.ARM_FRONT_BACK
+				.setStaticMaxValue(StaticLeapMinMaxes.ARM_FRONT_BACK
+						.getHardcoredMaxValue());
+
+		LeapMinMaxes.ARM_UP_DOWN
+				.setStaticMinValue(StaticLeapMinMaxes.ARM_UP_DOWN
+						.getHardcoredMinValue());
+		LeapMinMaxes.ARM_UP_DOWN
+				.setStaticMaxValue(StaticLeapMinMaxes.ARM_UP_DOWN
+						.getHardcoredMaxValue());
+
+		LeapMinMaxes.PITCH.setStaticMinValue(StaticLeapMinMaxes.PITCH
+				.getHardcoredMinValue());
+		LeapMinMaxes.PITCH.setStaticMaxValue(StaticLeapMinMaxes.PITCH
+				.getHardcoredMaxValue());
+
+		LeapMinMaxes.ROLL.setStaticMinValue(StaticLeapMinMaxes.ROLL
+				.getHardcoredMinValue());
+		LeapMinMaxes.ROLL.setStaticMaxValue(StaticLeapMinMaxes.ROLL
+				.getHardcoredMaxValue());
+
+		LeapMinMaxes.FINGERS_DISTANCE
+				.setStaticMinValue(StaticLeapMinMaxes.FINGERS_DISTANCE
+						.getHardcoredMinValue());
+		LeapMinMaxes.FINGERS_DISTANCE
+				.setStaticMaxValue(StaticLeapMinMaxes.FINGERS_DISTANCE
+						.getHardcoredMaxValue());
 
 	}
 }

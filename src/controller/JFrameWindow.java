@@ -9,6 +9,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.GroupLayout;
+import javax.swing.JCheckBox;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.UIManager;
@@ -499,6 +501,18 @@ public class JFrameWindow extends javax.swing.JFrame {
 		jPanelButtons_arm.removeAll();
 		jPanelButtons_arm.add(buttonsPanel);
 		jPanelButtons_arm.validate();
+	}
+	
+	public void setArmLeapCheckBox() {
+		checkBox = new JCheckBox("Hardcored leap boundaries", true);
+		checkBox.setBounds(15, 15, 200, 25);
+		jPanelButtons_arm.removeAll();
+		jPanelButtons_arm.add(checkBox);
+		jPanelButtons_arm.validate();
+	}
+	private JCheckBox checkBox;
+	public boolean areLeapBoundariesHardcoded(){
+		return checkBox.isSelected();
 	}
 
 	public void setHatSwitch(float hatSwitchPosition) {
