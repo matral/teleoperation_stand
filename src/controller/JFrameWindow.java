@@ -2,7 +2,6 @@ package controller;
 
 import java.awt.Color;
 import java.awt.Container;
-import java.awt.FlowLayout;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -10,18 +9,18 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
-import javax.swing.GroupLayout;
 import javax.swing.JCheckBox;
-import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JSplitPane;
-import javax.swing.JTextField;
+import javax.swing.JSlider;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
-import controller.controllers.ControllersHandler;
 import net.java.games.input.Component;
+import controller.controllers.ControllersHandler;
+import controller.util.ConnectionBuilder;
 
 /**
  * 
@@ -506,6 +505,7 @@ public class JFrameWindow extends javax.swing.JFrame {
 	}
 
 	public void setArmDevicesButtons(JPanel buttonsPanel) {
+	
 		jPanelButtons_arm.removeAll();
 		jPanelButtons_arm.add(buttonsPanel);
 		jPanelButtons_arm.validate();
@@ -519,6 +519,7 @@ public class JFrameWindow extends javax.swing.JFrame {
 	private JCheckBox handRollCheckBox;
 	private JCheckBox distanceOfFingersCheckBox;
 	private JLabel armStateInfo;
+	private JSlider armSpeedSlider;
 
 	private void initializeCheckBoxes() {
 		int xCheckBoxPositionInPanel = 15;
@@ -554,7 +555,7 @@ public class JFrameWindow extends javax.swing.JFrame {
 		handPitchCheckBox.setBounds(xCheckBoxPositionInPanel,
 				yCheckBoxPositionInPanel, checkBoxWidth, checkBoxHeight);
 		handPitchCheckBox.setEnabled(false);
-		
+
 		yCheckBoxPositionInPanel += checkBoxHeight;
 		distanceOfFingersCheckBox = new JCheckBox(
 				"Fingers distance boundaries", false);
@@ -566,11 +567,27 @@ public class JFrameWindow extends javax.swing.JFrame {
 		armStateInfo.setBounds(xCheckBoxPositionInPanel,
 				yCheckBoxPositionInPanel, checkBoxWidth, checkBoxHeight);
 		armStateInfo.setVisible(true);
+		yCheckBoxPositionInPanel += checkBoxHeight;
+		armSpeedSlider = new JSlider(1, 80, 30);
+
+		armSpeedSlider.setBounds(xCheckBoxPositionInPanel,
+				yCheckBoxPositionInPanel, checkBoxWidth, checkBoxHeight);
 
 	}
 
-	public void setArmLeapCheckBox() {
+	public void setArmLeapCheckBox(ConnectionBuilder connection) {
 		initializeCheckBoxes();
+		armSpeedSlider.addChangeListener(new ChangeListener() {
+
+			@Override
+			public void stateChanged(ChangeEvent arg0) {
+				for (int i = 0; i < 6; i++) {
+					connection.getHitecProxy().setSpeed(i,
+							armSpeedSlider.getValue());
+				}
+
+			}
+		});
 		hardcoredCheckBox.addItemListener(new ItemListener() {
 
 			@Override
@@ -581,10 +598,11 @@ public class JFrameWindow extends javax.swing.JFrame {
 					armUpDownCheckbox.setEnabled(checboEnabled);
 					armLeftRightCheckBox.setEnabled(checboEnabled);
 					handPitchCheckBox.setEnabled(checboEnabled);
-					
+
 					handRollCheckBox.setEnabled(checboEnabled);
 					distanceOfFingersCheckBox.setEnabled(checboEnabled);
-					armStateInfo.setText("Arm is running with prehardcored boundaries");
+					armStateInfo
+							.setText("Arm is running with prehardcored boundaries");
 				}
 				if (!hardcoredCheckBox.isSelected()) {
 					boolean checboEnabled = true;
@@ -595,7 +613,8 @@ public class JFrameWindow extends javax.swing.JFrame {
 					handPitchCheckBox.setSelected(true);
 					handRollCheckBox.setEnabled(checboEnabled);
 					distanceOfFingersCheckBox.setEnabled(checboEnabled);
-					armStateInfo.setText("Arm is moving with customized boundaries");
+					armStateInfo
+							.setText("Arm is moving with customized boundaries");
 				}
 
 			}
@@ -609,9 +628,11 @@ public class JFrameWindow extends javax.swing.JFrame {
 		jPanelButtons_arm.add(handRollCheckBox);
 		jPanelButtons_arm.add(distanceOfFingersCheckBox);
 		jPanelButtons_arm.add(armStateInfo);
+		jPanelButtons_arm.add(armSpeedSlider);
 		jPanelButtons_arm.validate();
 	}
-	public void setArmStateInfo(String text){
+
+	public void setArmStateInfo(String text) {
 		armStateInfo.setText(text);
 	}
 
