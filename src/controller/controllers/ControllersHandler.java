@@ -51,7 +51,7 @@ public class ControllersHandler {
 	private Controller keyboardArmController = null;
 	com.leapmotion.leap.Controller leapController = null;
 	private LeapListener leapListener;
-	private boolean isDebugEnabled = true;
+	private boolean isDebugEnabled = false;
 	private Hub myoController = null;
 	private DeviceListener myoListener;
 
@@ -126,7 +126,8 @@ public class ControllersHandler {
 		leapListener = new LeapListener();
 		if (leapController == null) {
 			leapController = new com.leapmotion.leap.Controller();
-		};
+		}
+		;
 		leapListener.setLipMinMaxesHardcoredValues();
 		window.setArmLeapCheckBox();
 		// leapController.addListener(leapListener);
@@ -398,8 +399,30 @@ public class ControllersHandler {
 							&& (leapController.frame().hands().leftmost()
 									.grabStrength() == 1 || leapController
 									.frame().hands().rightmost().grabStrength() == 1)
-							&& !window.areLeapBoundariesHardcoded())
-						leapListener.setLipMinMaxes(
+							&& !window.areLeapBoundariesHardcoded() &&window.isAtLeastOneBoundaryCheckBoxSelected()) {
+						window.setArmStateInfo("Arm is not running | Select which DOF boundarie is going to be changed");
+						if (window.isArmForwardBackwardCheckboxSelected()) {
+							leapListener.setLeapForwardBackwardBoundary(-hand.palmPosition().getZ());
+						}
+						if (window.isArmLeftRightCheckboxSelected()) {
+							leapListener.setLeapLeftRightBoundary(hand.palmPosition().getX());
+						}
+						if (window.isArmUpDownCheckboxSelected()) {
+							leapListener.setLeapUpDownBoundary(hand.palmPosition().getY());
+						}	
+						if (window.isHandPitchCheckboxSelected()) {
+							leapListener.setLeapPitchBoundary(direction.pitch());
+						}
+						if (window.isHandRollCheckboxSelected()) {
+							leapListener.setLeapRollBoundary(-normal.roll());
+						}
+						if (window.isDistanceOfFingersCheckboxSelected()) {
+							leapListener.setLeapDistanceOfFingersBoundary(fingers.get(2)
+									.tipPosition()
+									.distanceTo(
+											fingers.get(3).tipPosition()));
+						}
+						/*leapListener.setLipMinMaxes(
 								hand.palmPosition().getX(),
 								hand.palmPosition().getY(),
 								-hand.palmPosition().getZ(),
@@ -409,22 +432,28 @@ public class ControllersHandler {
 								fingers.get(2)
 										.tipPosition()
 										.distanceTo(
-												fingers.get(3).tipPosition()));
-					else {
+												fingers.get(3).tipPosition()));*/
+					} else {
 						leapListener.setLipMinMaxesStaticValues();
-
-						leapListener.setServos(
-								hand.palmPosition().getX(),
-								hand.palmPosition().getY(),
-								-hand.palmPosition().getZ(),
-								direction.pitch(),
-								normal.roll(),
-								-avgPos.getY(),
-								fingers.get(2)
-										.tipPosition()
-										.distanceTo(
-												fingers.get(3).tipPosition()),
-								connection);
+						
+						if (!window.isAtLeastOneBoundaryCheckBoxSelected()) {
+							window.setArmStateInfo("Arm is running with customized boundaries");
+							leapListener.setServos(
+									hand.palmPosition().getX(),
+									hand.palmPosition().getY(),
+									-hand.palmPosition().getZ(),
+									direction.pitch(),
+									normal.roll(),
+									-avgPos.getY(),
+									fingers.get(2)
+											.tipPosition()
+											.distanceTo(
+													fingers.get(3)
+															.tipPosition()),
+									connection);
+						}else{
+							window.setArmStateInfo("Arm is not running | Select which DOF boundarie is going to be changed");
+						}
 					}
 
 				}

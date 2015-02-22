@@ -389,4 +389,109 @@ public class LeapListener extends Listener {
 						.getHardcoredMaxValue());
 
 	}
+
+	public void setLeapDistanceOfFingersBoundary(float distanceOfFingers) {
+
+		System.out.println("Finger distance min : "
+				+ LeapMinMaxes.FINGERS_DISTANCE.getAttributeMinValue()
+				+ "Finger distance max : "
+				+ LeapMinMaxes.FINGERS_DISTANCE.getAttributeMaxValue());
+
+		if (distanceOfFingers > LeapMinMaxes.FINGERS_DISTANCE
+				.getStaticMaxValue()) {
+			LeapMinMaxes.FINGERS_DISTANCE
+					.setAttributeMaxValue(distanceOfFingers);
+			LeapMinMaxes.FINGERS_DISTANCE.setStaticMaxValue(distanceOfFingers);
+		}
+		if (distanceOfFingers < LeapMinMaxes.FINGERS_DISTANCE
+				.getStaticMinValue()) {
+			LeapMinMaxes.FINGERS_DISTANCE
+					.setAttributeMinValue(distanceOfFingers);
+			LeapMinMaxes.FINGERS_DISTANCE.setStaticMinValue(distanceOfFingers);
+		}
+
+	}
+
+	public void setLeapRollBoundary(float handRoll) {
+
+		System.out.println("Arm roll min : "
+				+ LeapMinMaxes.ROLL.getAttributeMinValue() + "Arm roll max : "
+				+ LeapMinMaxes.ROLL.getAttributeMaxValue());
+		if (handRoll > LeapMinMaxes.ROLL.getStaticMaxValue()) {
+			LeapMinMaxes.ROLL.setAttributeMaxValue(handRoll);
+			LeapMinMaxes.ROLL.setStaticMaxValue(handRoll);
+		}
+		if (handRoll < LeapMinMaxes.ROLL.getStaticMinValue()) {
+			LeapMinMaxes.ROLL.setAttributeMinValue(handRoll);
+			LeapMinMaxes.ROLL.setStaticMinValue(handRoll);
+		}
+
+	}
+
+	public void setLeapPitchBoundary(float handPitch) {
+		System.out.println("Arm pitch min : "
+				+ LeapMinMaxes.PITCH.getAttributeMinValue()
+				+ "Arm pitch max : "
+				+ LeapMinMaxes.PITCH.getAttributeMaxValue());
+		if (handPitch > LeapMinMaxes.PITCH.getStaticMaxValue()) {
+			LeapMinMaxes.PITCH.setAttributeMaxValue(handPitch);
+			LeapMinMaxes.PITCH.setStaticMaxValue(handPitch);
+		}
+		if (handPitch < LeapMinMaxes.PITCH.getStaticMinValue()) {
+			LeapMinMaxes.PITCH.setAttributeMinValue(handPitch);
+			LeapMinMaxes.PITCH.setStaticMinValue(handPitch);
+		}
+
+	}
+
+	public void setLeapUpDownBoundary(float armUpDown) {
+		System.out.println("Arm down : "
+				+ LeapMinMaxes.ARM_UP_DOWN.getAttributeMinValue() + "Arm up : "
+				+ LeapMinMaxes.ARM_UP_DOWN.getAttributeMaxValue());
+		if (armUpDown > LeapMinMaxes.ARM_UP_DOWN.getStaticMaxValue()) {
+			LeapMinMaxes.ARM_UP_DOWN.setAttributeMaxValue(armUpDown);
+			LeapMinMaxes.ARM_UP_DOWN.setStaticMaxValue(armUpDown);
+		}
+		if (armUpDown < LeapMinMaxes.ARM_UP_DOWN.getStaticMinValue()) {
+			LeapMinMaxes.ARM_UP_DOWN.setAttributeMinValue(armUpDown);
+			LeapMinMaxes.ARM_UP_DOWN.setStaticMinValue(armUpDown);
+		}
+
+	}
+
+	public void setLeapLeftRightBoundary(float armLeftRight) {
+		System.out.println("Arm left : "
+				+ LeapMinMaxes.ARM_LEFT_RIGHT.getAttributeMinValue()
+				+ "Arm right : "
+				+ LeapMinMaxes.ARM_LEFT_RIGHT.getAttributeMaxValue());
+		if (armLeftRight > LeapMinMaxes.ARM_LEFT_RIGHT.getStaticMaxValue()) {
+			LeapMinMaxes.ARM_LEFT_RIGHT.setAttributeMaxValue(armLeftRight);
+			LeapMinMaxes.ARM_LEFT_RIGHT.setStaticMaxValue(armLeftRight);
+		}
+		if (armLeftRight < LeapMinMaxes.ARM_LEFT_RIGHT.getStaticMinValue()) {
+			LeapMinMaxes.ARM_LEFT_RIGHT.setAttributeMinValue(armLeftRight);
+			LeapMinMaxes.ARM_LEFT_RIGHT.setStaticMinValue(armLeftRight);
+		}
+
+	}
+
+	public void setLeapForwardBackwardBoundary(float armForwardBackward) {
+		System.out.println("Arm back : "
+				+ LeapMinMaxes.ARM_FRONT_BACK.getAttributeMinValue()
+				+ "Arm front : "
+				+ LeapMinMaxes.ARM_FRONT_BACK.getAttributeMaxValue());
+		if (armForwardBackward > LeapMinMaxes.ARM_FRONT_BACK
+				.getStaticMaxValue()) {
+			LeapMinMaxes.ARM_FRONT_BACK
+					.setAttributeMaxValue(armForwardBackward);
+			LeapMinMaxes.ARM_FRONT_BACK.setStaticMaxValue(armForwardBackward);
+		}
+		if (armForwardBackward < LeapMinMaxes.ARM_FRONT_BACK
+				.getStaticMinValue()) {
+			LeapMinMaxes.ARM_FRONT_BACK
+					.setAttributeMinValue(armForwardBackward);
+			LeapMinMaxes.ARM_FRONT_BACK.setStaticMinValue(armForwardBackward);
+		}
+
+	}
 }

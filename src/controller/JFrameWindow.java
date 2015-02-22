@@ -7,12 +7,16 @@ import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 
 import javax.swing.GroupLayout;
 import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
+import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
@@ -70,7 +74,7 @@ public class JFrameWindow extends javax.swing.JFrame {
 		jComboBox_carControllers = new javax.swing.JComboBox();
 		jComboBox_armControllers = new javax.swing.JComboBox();
 		jComboBox_armControllers.addActionListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				controllersHandler.setListeners();
@@ -459,20 +463,22 @@ public class JFrameWindow extends javax.swing.JFrame {
 	public int getSelectedCarControllerName() {
 		return jComboBox_carControllers.getSelectedIndex();
 	}
+
 	public String getSelectedArmDevicesName() {
-		return (String)jComboBox_armControllers.getSelectedItem();
+		return (String) jComboBox_armControllers.getSelectedItem();
 	}
-	
+
 	public void addCarControllerName(String controllerName) {
 		jComboBox_carControllers.addItem(controllerName);
 	}
-	
+
 	public void addArmControllerName(String controllerName) {
-		
+
 		jComboBox_armControllers.addItem(controllerName);
 	}
-	public void removeArmControllerName(String controllerName){
-		
+
+	public void removeArmControllerName(String controllerName) {
+
 		jComboBox_armControllers.removeItem(controllerName);
 	}
 
@@ -480,6 +486,7 @@ public class JFrameWindow extends javax.swing.JFrame {
 		jComboBox_carControllers.removeAllItems();
 		jComboBox_carControllers.addItem("Controller disconnected!");
 	}
+
 	public void showArmDevicesNameDisconnected() {
 		jComboBox_armControllers.removeAllItems();
 		jComboBox_armControllers.addItem("All arm devices disconnected!");
@@ -497,22 +504,152 @@ public class JFrameWindow extends javax.swing.JFrame {
 		jPanelButtons.add(buttonsPanel);
 		jPanelButtons.validate();
 	}
+
 	public void setArmDevicesButtons(JPanel buttonsPanel) {
 		jPanelButtons_arm.removeAll();
 		jPanelButtons_arm.add(buttonsPanel);
 		jPanelButtons_arm.validate();
 	}
-	
+
+	private JCheckBox hardcoredCheckBox;
+	private JCheckBox armForwardBackwardCheckbox;
+	private JCheckBox armUpDownCheckbox;
+	private JCheckBox armLeftRightCheckBox;
+	private JCheckBox handPitchCheckBox;
+	private JCheckBox handRollCheckBox;
+	private JCheckBox distanceOfFingersCheckBox;
+	private JLabel armStateInfo;
+
+	private void initializeCheckBoxes() {
+		int xCheckBoxPositionInPanel = 15;
+		int checkBoxWidth = 200;
+		int checkBoxHeight = 20;
+		int yCheckBoxPositionInPanel = 15;
+		hardcoredCheckBox = new JCheckBox("Hardcored leap boundaries", true);
+		hardcoredCheckBox.setBounds(xCheckBoxPositionInPanel,
+				yCheckBoxPositionInPanel, checkBoxWidth, checkBoxHeight);
+		yCheckBoxPositionInPanel += checkBoxHeight;
+		armForwardBackwardCheckbox = new JCheckBox(
+				"Arm forward/backward boundaries", false);
+		armForwardBackwardCheckbox.setBounds(xCheckBoxPositionInPanel,
+				yCheckBoxPositionInPanel, checkBoxWidth, checkBoxHeight);
+		armForwardBackwardCheckbox.setEnabled(false);
+		yCheckBoxPositionInPanel += checkBoxHeight;
+		armUpDownCheckbox = new JCheckBox("Arm up/down boundaries", false);
+		armUpDownCheckbox.setBounds(xCheckBoxPositionInPanel,
+				yCheckBoxPositionInPanel, checkBoxWidth, checkBoxHeight);
+		armUpDownCheckbox.setEnabled(false);
+		yCheckBoxPositionInPanel += checkBoxHeight;
+		armLeftRightCheckBox = new JCheckBox("Arm left/right boundaries", false);
+		armLeftRightCheckBox.setBounds(xCheckBoxPositionInPanel,
+				yCheckBoxPositionInPanel, checkBoxWidth, checkBoxHeight);
+		armLeftRightCheckBox.setEnabled(false);
+		yCheckBoxPositionInPanel += checkBoxHeight;
+		handRollCheckBox = new JCheckBox("Arm roll boundaries", false);
+		handRollCheckBox.setBounds(xCheckBoxPositionInPanel,
+				yCheckBoxPositionInPanel, checkBoxWidth, checkBoxHeight);
+		handRollCheckBox.setEnabled(false);
+		yCheckBoxPositionInPanel += checkBoxHeight;
+		handPitchCheckBox = new JCheckBox("Arm pitch boundaries", false);
+		handPitchCheckBox.setBounds(xCheckBoxPositionInPanel,
+				yCheckBoxPositionInPanel, checkBoxWidth, checkBoxHeight);
+		handPitchCheckBox.setEnabled(false);
+		
+		yCheckBoxPositionInPanel += checkBoxHeight;
+		distanceOfFingersCheckBox = new JCheckBox(
+				"Fingers distance boundaries", false);
+		distanceOfFingersCheckBox.setBounds(xCheckBoxPositionInPanel,
+				yCheckBoxPositionInPanel, checkBoxWidth, checkBoxHeight);
+		distanceOfFingersCheckBox.setEnabled(false);
+		yCheckBoxPositionInPanel += checkBoxHeight;
+		armStateInfo = new JLabel();
+		armStateInfo.setBounds(xCheckBoxPositionInPanel,
+				yCheckBoxPositionInPanel, checkBoxWidth, checkBoxHeight);
+		armStateInfo.setVisible(true);
+
+	}
+
 	public void setArmLeapCheckBox() {
-		checkBox = new JCheckBox("Hardcored leap boundaries", true);
-		checkBox.setBounds(15, 15, 200, 25);
+		initializeCheckBoxes();
+		hardcoredCheckBox.addItemListener(new ItemListener() {
+
+			@Override
+			public void itemStateChanged(ItemEvent arg0) {
+				if (hardcoredCheckBox.isSelected()) {
+					boolean checboEnabled = false;
+					armForwardBackwardCheckbox.setEnabled(checboEnabled);
+					armUpDownCheckbox.setEnabled(checboEnabled);
+					armLeftRightCheckBox.setEnabled(checboEnabled);
+					handPitchCheckBox.setEnabled(checboEnabled);
+					
+					handRollCheckBox.setEnabled(checboEnabled);
+					distanceOfFingersCheckBox.setEnabled(checboEnabled);
+					armStateInfo.setText("Arm is running with prehardcored boundaries");
+				}
+				if (!hardcoredCheckBox.isSelected()) {
+					boolean checboEnabled = true;
+					armForwardBackwardCheckbox.setEnabled(checboEnabled);
+					armUpDownCheckbox.setEnabled(checboEnabled);
+					armLeftRightCheckBox.setEnabled(checboEnabled);
+					handPitchCheckBox.setEnabled(checboEnabled);
+					handPitchCheckBox.setSelected(true);
+					handRollCheckBox.setEnabled(checboEnabled);
+					distanceOfFingersCheckBox.setEnabled(checboEnabled);
+					armStateInfo.setText("Arm is moving with customized boundaries");
+				}
+
+			}
+		});
 		jPanelButtons_arm.removeAll();
-		jPanelButtons_arm.add(checkBox);
+		jPanelButtons_arm.add(hardcoredCheckBox);
+		jPanelButtons_arm.add(armForwardBackwardCheckbox);
+		jPanelButtons_arm.add(armUpDownCheckbox);
+		jPanelButtons_arm.add(armLeftRightCheckBox);
+		jPanelButtons_arm.add(handPitchCheckBox);
+		jPanelButtons_arm.add(handRollCheckBox);
+		jPanelButtons_arm.add(distanceOfFingersCheckBox);
+		jPanelButtons_arm.add(armStateInfo);
 		jPanelButtons_arm.validate();
 	}
-	private JCheckBox checkBox;
-	public boolean areLeapBoundariesHardcoded(){
-		return checkBox.isSelected();
+	public void setArmStateInfo(String text){
+		armStateInfo.setText(text);
+	}
+
+	public boolean isAtLeastOneBoundaryCheckBoxSelected() {
+		return isArmForwardBackwardCheckboxSelected()
+				|| isArmLeftRightCheckboxSelected()
+				|| isArmUpDownCheckboxSelected()
+				|| isHandPitchCheckboxSelected()
+				|| isHandRollCheckboxSelected()
+				|| isDistanceOfFingersCheckboxSelected();
+	}
+
+	public boolean areLeapBoundariesHardcoded() {
+		return hardcoredCheckBox.isSelected();
+	}
+
+	public boolean isArmForwardBackwardCheckboxSelected() {
+		return armForwardBackwardCheckbox.isSelected();
+	}
+
+	public boolean isArmUpDownCheckboxSelected() {
+		return armUpDownCheckbox.isSelected();
+	}
+
+	public boolean isArmLeftRightCheckboxSelected() {
+		return armLeftRightCheckBox.isSelected();
+	}
+
+	public boolean isHandPitchCheckboxSelected() {
+		return handPitchCheckBox.isSelected();
+	}
+
+	public boolean isHandRollCheckboxSelected() {
+		return handRollCheckBox.isSelected();
+	}
+
+	public boolean isDistanceOfFingersCheckboxSelected() {
+		return distanceOfFingersCheckBox.isSelected();
 	}
 
 	public void setHatSwitch(float hatSwitchPosition) {
