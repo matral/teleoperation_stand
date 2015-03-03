@@ -120,7 +120,7 @@ public class LeapListener extends Listener {
 						ServoBoundaries.BOTTOM.getServoMinValue(),
 						ServoBoundaries.BOTTOM.getServoMaxValue(),
 						last_armLeftRightRescaled,
-						ServoBoundaries.BOTTOM.getServoEpsilon());
+						ServoBoundaries.BOTTOM.getServoEpsilon(),revert);
 
 		int armUpDownRescaled = ServosPositionsCalulations
 				.rescaleAndCheckEpsilonEcxeeding(armUpDown,
@@ -129,7 +129,7 @@ public class LeapListener extends Listener {
 						ServoBoundaries.DOF_1.getServoMinValue(),
 						ServoBoundaries.DOF_1.getServoMaxValue(),
 						last_armUpDownRescaled,
-						ServoBoundaries.DOF_1.getServoEpsilon());
+						ServoBoundaries.DOF_1.getServoEpsilon(),revert);
 
 		int armForwardBackwardRescaled = ServosPositionsCalulations
 				.rescaleAndCheckEpsilonEcxeeding(armForwardBackward,
@@ -154,7 +154,7 @@ public class LeapListener extends Listener {
 						ServoBoundaries.CATCHER_ROTATOR.getServoMinValue(),
 						ServoBoundaries.CATCHER_ROTATOR.getServoMaxValue(),
 						last_handTipYRescaled,
-						ServoBoundaries.CATCHER_ROTATOR.getServoEpsilon());
+						ServoBoundaries.CATCHER_ROTATOR.getServoEpsilon(),revert);
 		int handDistanceOfFingersRescaled = ServosPositionsCalulations
 				.rescaleAndCheckEpsilonEcxeeding(distanceOfFingers,
 						LeapMinMaxes.FINGERS_DISTANCE.getAttributeMinValue(),

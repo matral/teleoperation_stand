@@ -781,7 +781,7 @@ public class ControllersHandler {
 		while (true) {
 
 			updateArm();
-			// updateCar(connection,mecanumDriver);
+		    updateCar(mecanumDriver);
 
 			// We have to give processor some rest.
 			try {
