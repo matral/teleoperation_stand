@@ -64,19 +64,31 @@ public class JFrameWindow extends javax.swing.JFrame {
 	private void initComponents(ControllersHandler controllersHandler) {
 
 		jPanelAxes = new javax.swing.JPanel();
+		jPanelAxes_arm = new javax.swing.JPanel();
 		jLabelXYAxis = new javax.swing.JLabel();
 		jPanelXYAxis = new javax.swing.JPanel();
+		jLabelXYAxis_arm = new javax.swing.JLabel();
+		jPanelXYAxis_arm = new javax.swing.JPanel();
 		jPanel_forAxis = new javax.swing.JPanel();
+		jPanel_forAxis_arm = new javax.swing.JPanel();
 		jPanelButtons = new javax.swing.JPanel();
 		jPanelButtons_arm = new javax.swing.JPanel();
 		jPanelHatSwitch = new javax.swing.JPanel();
+		jPanelHatSwitch_arm = new javax.swing.JPanel();
 		jComboBox_carControllers = new javax.swing.JComboBox();
+		jComboBox_carControllers.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				controllersHandler.setCarListeners();
+			}
+		});
 		jComboBox_armControllers = new javax.swing.JComboBox();
 		jComboBox_armControllers.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				controllersHandler.setListeners();
+				controllersHandler.setArmListeners();
 			}
 		});
 
@@ -87,12 +99,21 @@ public class JFrameWindow extends javax.swing.JFrame {
 				"Axes", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
 				javax.swing.border.TitledBorder.DEFAULT_POSITION, null,
 				new java.awt.Color(0, 51, 204)));
+		jPanelAxes_arm.setBorder(javax.swing.BorderFactory.createTitledBorder(null,
+				"Axes", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
+				javax.swing.border.TitledBorder.DEFAULT_POSITION, null,
+				new java.awt.Color(0, 51, 204)));
 
 		jLabelXYAxis.setText("X Axis / Y Axis");
+		jLabelXYAxis_arm.setText("X Axis / Y Axis");
 
 		jPanelXYAxis.setBorder(javax.swing.BorderFactory
 				.createLineBorder(new java.awt.Color(0, 0, 0)));
 		jPanelXYAxis.setPreferredSize(new java.awt.Dimension(111, 111));
+		
+		jPanelXYAxis_arm.setBorder(javax.swing.BorderFactory
+				.createLineBorder(new java.awt.Color(0, 0, 0)));
+		jPanelXYAxis_arm.setPreferredSize(new java.awt.Dimension(111, 111));
 
 		javax.swing.GroupLayout jPanelXYAxisLayout = new javax.swing.GroupLayout(
 				jPanelXYAxis);
@@ -103,6 +124,16 @@ public class JFrameWindow extends javax.swing.JFrame {
 		jPanelXYAxisLayout.setVerticalGroup(jPanelXYAxisLayout
 				.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
 				.addGap(0, 109, Short.MAX_VALUE));
+		
+		javax.swing.GroupLayout jPanelXYAxisLayout_arm= new javax.swing.GroupLayout(
+				jPanelXYAxis_arm);
+		jPanelXYAxis_arm.setLayout(jPanelXYAxisLayout_arm);
+		jPanelXYAxisLayout_arm.setHorizontalGroup(jPanelXYAxisLayout_arm
+				.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+				.addGap(0, 109, Short.MAX_VALUE));
+		jPanelXYAxisLayout_arm.setVerticalGroup(jPanelXYAxisLayout_arm
+				.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+				.addGap(0, 109, Short.MAX_VALUE));
 
 		javax.swing.GroupLayout jPanel_forAxisLayout = new javax.swing.GroupLayout(
 				jPanel_forAxis);
@@ -111,6 +142,16 @@ public class JFrameWindow extends javax.swing.JFrame {
 				.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
 				.addGap(0, 202, Short.MAX_VALUE));
 		jPanel_forAxisLayout.setVerticalGroup(jPanel_forAxisLayout
+				.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+				.addGap(0, 0, Short.MAX_VALUE));
+		
+		javax.swing.GroupLayout jPanel_forAxisLayout_arm = new javax.swing.GroupLayout(
+				jPanel_forAxis_arm);
+		jPanel_forAxis_arm.setLayout(jPanel_forAxisLayout_arm);
+		jPanel_forAxisLayout_arm.setHorizontalGroup(jPanel_forAxisLayout_arm
+				.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+				.addGap(0, 202, Short.MAX_VALUE));
+		jPanel_forAxisLayout_arm.setVerticalGroup(jPanel_forAxisLayout_arm
 				.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
 				.addGap(0, 0, Short.MAX_VALUE));
 
@@ -177,6 +218,70 @@ public class JFrameWindow extends javax.swing.JFrame {
 								javax.swing.GroupLayout.DEFAULT_SIZE,
 								javax.swing.GroupLayout.DEFAULT_SIZE,
 								Short.MAX_VALUE));
+		
+		javax.swing.GroupLayout jPanelAxesLayout_arm = new javax.swing.GroupLayout(
+				jPanelAxes_arm);
+		jPanelAxes_arm.setLayout(jPanelAxesLayout_arm);
+		jPanelAxesLayout_arm
+				.setHorizontalGroup(jPanelAxesLayout_arm
+						.createParallelGroup(
+								javax.swing.GroupLayout.Alignment.LEADING)
+						.addGroup(
+								jPanelAxesLayout_arm
+										.createSequentialGroup()
+										.addGroup(
+												jPanelAxesLayout_arm
+														.createParallelGroup(
+																javax.swing.GroupLayout.Alignment.LEADING)
+														.addGroup(
+																jPanelAxesLayout_arm
+																		.createSequentialGroup()
+																		.addGap(58,
+																				58,
+																				58)
+																		.addComponent(
+																				jLabelXYAxis_arm))
+														.addGroup(
+																jPanelAxesLayout_arm
+																		.createSequentialGroup()
+																		.addGap(37,
+																				37,
+																				37)
+																		.addComponent(
+																				jPanelXYAxis_arm,
+																				javax.swing.GroupLayout.PREFERRED_SIZE,
+																				javax.swing.GroupLayout.DEFAULT_SIZE,
+																				javax.swing.GroupLayout.PREFERRED_SIZE)))
+										.addPreferredGap(
+												javax.swing.LayoutStyle.ComponentPlacement.RELATED,
+												javax.swing.GroupLayout.DEFAULT_SIZE,
+												Short.MAX_VALUE)
+										.addComponent(
+												jPanel_forAxis_arm,
+												javax.swing.GroupLayout.PREFERRED_SIZE,
+												javax.swing.GroupLayout.DEFAULT_SIZE,
+												javax.swing.GroupLayout.PREFERRED_SIZE)
+										.addContainerGap()));
+		jPanelAxesLayout_arm
+				.setVerticalGroup(jPanelAxesLayout_arm
+						.createParallelGroup(
+								javax.swing.GroupLayout.Alignment.LEADING)
+						.addGroup(
+								jPanelAxesLayout_arm
+										.createSequentialGroup()
+										.addComponent(jLabelXYAxis_arm)
+										.addPreferredGap(
+												javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+										.addComponent(
+												jPanelXYAxis_arm,
+												javax.swing.GroupLayout.PREFERRED_SIZE,
+												javax.swing.GroupLayout.DEFAULT_SIZE,
+												javax.swing.GroupLayout.PREFERRED_SIZE)
+										.addGap(0, 16, Short.MAX_VALUE))
+						.addComponent(jPanel_forAxis_arm,
+								javax.swing.GroupLayout.DEFAULT_SIZE,
+								javax.swing.GroupLayout.DEFAULT_SIZE,
+								Short.MAX_VALUE));
 
 		jPanelButtons.setBorder(javax.swing.BorderFactory.createTitledBorder(
 				null, "Buttons",
@@ -217,6 +322,12 @@ public class JFrameWindow extends javax.swing.JFrame {
 				javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
 				javax.swing.border.TitledBorder.DEFAULT_POSITION, null,
 				new java.awt.Color(0, 51, 204)));
+		
+		jPanelHatSwitch_arm.setBorder(javax.swing.BorderFactory.createTitledBorder(
+				null, "Hat Switch",
+				javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
+				javax.swing.border.TitledBorder.DEFAULT_POSITION, null,
+				new java.awt.Color(0, 51, 204)));
 
 		javax.swing.GroupLayout jPanelHatSwitchLayout = new javax.swing.GroupLayout(
 				jPanelHatSwitch);
@@ -225,6 +336,16 @@ public class JFrameWindow extends javax.swing.JFrame {
 				.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
 				.addGap(0, 121, Short.MAX_VALUE));
 		jPanelHatSwitchLayout.setVerticalGroup(jPanelHatSwitchLayout
+				.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+				.addGap(0, 0, Short.MAX_VALUE));
+		
+		javax.swing.GroupLayout jPanelHatSwitchLayout_arm = new javax.swing.GroupLayout(
+				jPanelHatSwitch_arm);
+		jPanelHatSwitch_arm.setLayout(jPanelHatSwitchLayout_arm);
+		jPanelHatSwitchLayout_arm.setHorizontalGroup(jPanelHatSwitchLayout_arm
+				.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+				.addGap(0, 121, Short.MAX_VALUE));
+		jPanelHatSwitchLayout_arm.setVerticalGroup(jPanelHatSwitchLayout_arm
 				.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
 				.addGap(0, 0, Short.MAX_VALUE));
 
@@ -375,7 +496,17 @@ public class JFrameWindow extends javax.swing.JFrame {
 																												javax.swing.GroupLayout.DEFAULT_SIZE,
 																												javax.swing.GroupLayout.PREFERRED_SIZE)
 																										.addPreferredGap(
-																												javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
+																												javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+																												.addComponent(
+																														jPanelHatSwitch_arm,
+																														javax.swing.GroupLayout.DEFAULT_SIZE,
+																														javax.swing.GroupLayout.DEFAULT_SIZE,
+																														Short.MAX_VALUE))
+																								.addComponent(
+																										jPanelAxes_arm,
+																										javax.swing.GroupLayout.DEFAULT_SIZE,
+																										javax.swing.GroupLayout.DEFAULT_SIZE,
+																										Short.MAX_VALUE))
 																		.addContainerGap())
 														.addGroup(
 																javax.swing.GroupLayout.Alignment.TRAILING,
@@ -409,6 +540,13 @@ public class JFrameWindow extends javax.swing.JFrame {
 												javax.swing.GroupLayout.PREFERRED_SIZE)
 										.addPreferredGap(
 												javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+																						.addComponent(
+												jPanelAxes_arm,
+												javax.swing.GroupLayout.PREFERRED_SIZE,
+												javax.swing.GroupLayout.DEFAULT_SIZE,
+												javax.swing.GroupLayout.PREFERRED_SIZE)
+										.addPreferredGap(
+												javax.swing.LayoutStyle.ComponentPlacement.RELATED)
 										.addGroup(
 												layout_right
 														.createParallelGroup(
@@ -418,7 +556,12 @@ public class JFrameWindow extends javax.swing.JFrame {
 																jPanelButtons_arm,
 																javax.swing.GroupLayout.DEFAULT_SIZE,
 																javax.swing.GroupLayout.DEFAULT_SIZE,
-																Short.MAX_VALUE))
+																Short.MAX_VALUE)
+														.addComponent(
+																jPanelHatSwitch_arm,
+																javax.swing.GroupLayout.DEFAULT_SIZE,
+																javax.swing.GroupLayout.DEFAULT_SIZE,
+																Short.MAX_VALUE))																
 										.addContainerGap()));
 
 		getContentPane().setLayout(new GridLayout(1, 3));
@@ -436,32 +579,41 @@ public class JFrameWindow extends javax.swing.JFrame {
 		jPanel_forAxis.removeAll();
 		jPanel_forAxis.repaint();
 	}// GEN-LAST:event_jComboBox_controllersActionPerformed
+	
 
 	private void jComboBox_armControllersActionPerformed(
 			java.awt.event.ActionEvent evt) {// GEN-FIRST:event_jComboBox_controllersActionPerformed
 		// When another controller is selected we have to remove old stuff.
 		jPanelButtons_arm.removeAll();
 		jPanelButtons_arm.repaint();
+		jPanel_forAxis_arm.removeAll();
+		jPanel_forAxis_arm.repaint();
 	}
 
 	// Variables declaration - do not modify//GEN-BEGIN:variables
 	private javax.swing.JComboBox jComboBox_carControllers;
 	private javax.swing.JComboBox jComboBox_armControllers;
 	private javax.swing.JLabel jLabelXYAxis;
+	private javax.swing.JLabel jLabelXYAxis_arm;
 	private javax.swing.JPanel jPanelAxes;
+	private javax.swing.JPanel jPanelAxes_arm;
 	private javax.swing.JPanel jPanelButtons;
 	private javax.swing.JPanel jPanelButtons_arm;
 	private javax.swing.JPanel jPanelHatSwitch;
+	private javax.swing.JPanel jPanelHatSwitch_arm;
 	private javax.swing.JPanel jPanelXYAxis;
+	private javax.swing.JPanel jPanelXYAxis_arm;
 	private javax.swing.JPanel jPanel_forAxis;
+	private javax.swing.JPanel jPanel_forAxis_arm;
 
 	// End of variables declaration//GEN-END:variables
 
 	/* Methods for setting components on the window. */
 
-	public int getSelectedCarControllerName() {
-		return jComboBox_carControllers.getSelectedIndex();
+	public String getSelectedCarDevicesName() {
+		return (String) jComboBox_carControllers.getSelectedItem();
 	}
+
 
 	public String getSelectedArmDevicesName() {
 		return (String) jComboBox_armControllers.getSelectedItem();
@@ -480,8 +632,13 @@ public class JFrameWindow extends javax.swing.JFrame {
 
 		jComboBox_armControllers.removeItem(controllerName);
 	}
+	public void removeCarControllerName(String controllerName) {
 
-	public void showControllerDisconnected() {
+		jComboBox_carControllers.removeItem(controllerName);
+	}
+
+
+	public void showCarDevicesNameDisconnected() {
 		jComboBox_carControllers.removeAllItems();
 		jComboBox_carControllers.addItem("Controller disconnected!");
 	}
@@ -495,6 +652,13 @@ public class JFrameWindow extends javax.swing.JFrame {
 		Graphics2D g2d = (Graphics2D) jPanelXYAxis.getGraphics();
 		g2d.clearRect(1, 1, jPanelXYAxis.getWidth() - 2,
 				jPanelXYAxis.getHeight() - 2);
+		g2d.fillOval(xPercentage, yPercentage, 10, 10);
+	}
+	
+	public void setArmXYAxis(int xPercentage, int yPercentage) {
+		Graphics2D g2d = (Graphics2D) jPanelXYAxis_arm.getGraphics();
+		g2d.clearRect(1, 1, jPanelXYAxis_arm.getWidth() - 2,
+				jPanelXYAxis_arm.getHeight() - 2);
 		g2d.fillOval(xPercentage, yPercentage, 10, 10);
 	}
 
@@ -725,10 +889,69 @@ public class JFrameWindow extends javax.swing.JFrame {
 
 		g2d.fillOval(x, y, smallCircleSize, smallCircleSize);
 	}
+	
+	public void setArmHatSwitch(float hatSwitchPosition) {
+		int circleSize = 100;
+
+		Graphics2D g2d = (Graphics2D) jPanelHatSwitch_arm.getGraphics();
+		g2d.clearRect(5, 15, jPanelHatSwitch_arm.getWidth() - 10,
+				jPanelHatSwitch_arm.getHeight() - 22);
+		g2d.drawOval(20, 22, circleSize, circleSize);
+
+		if (Float.compare(hatSwitchPosition, Component.POV.OFF) == 0)
+			return;
+
+		int smallCircleSize = 10;
+		int upCircleX = 65;
+		int upCircleY = 17;
+		int leftCircleX = 15;
+		int leftCircleY = 68;
+		int betweenX = 37;
+		int betweenY = 17;
+
+		int x = 0;
+		int y = 0;
+
+		g2d.setColor(Color.blue);
+
+		if (Float.compare(hatSwitchPosition, Component.POV.UP) == 0) {
+			x = upCircleX;
+			y = upCircleY;
+		} else if (Float.compare(hatSwitchPosition, Component.POV.DOWN) == 0) {
+			x = upCircleX;
+			y = upCircleY + circleSize;
+		} else if (Float.compare(hatSwitchPosition, Component.POV.LEFT) == 0) {
+			x = leftCircleX;
+			y = leftCircleY;
+		} else if (Float.compare(hatSwitchPosition, Component.POV.RIGHT) == 0) {
+			x = leftCircleX + circleSize;
+			y = leftCircleY;
+		} else if (Float.compare(hatSwitchPosition, Component.POV.UP_LEFT) == 0) {
+			x = upCircleX - betweenX;
+			y = upCircleY + betweenY;
+		} else if (Float.compare(hatSwitchPosition, Component.POV.UP_RIGHT) == 0) {
+			x = upCircleX + betweenX;
+			y = upCircleY + betweenY;
+		} else if (Float.compare(hatSwitchPosition, Component.POV.DOWN_LEFT) == 0) {
+			x = upCircleX - betweenX;
+			y = upCircleY + circleSize - betweenY;
+		} else if (Float.compare(hatSwitchPosition, Component.POV.DOWN_RIGHT) == 0) {
+			x = upCircleX + betweenX;
+			y = upCircleY + circleSize - betweenY;
+		}
+
+		g2d.fillOval(x, y, smallCircleSize, smallCircleSize);
+	}
 
 	public void addAxisPanel(javax.swing.JPanel axesPanel) {
 		jPanel_forAxis.removeAll();
 		jPanel_forAxis.add(axesPanel);
 		jPanel_forAxis.validate();
 	}
+	public void addArmAxisPanel(javax.swing.JPanel axesPanel) {
+		jPanel_forAxis_arm.removeAll();
+		jPanel_forAxis_arm.add(axesPanel);
+		jPanel_forAxis_arm.validate();
+	}
+	
 }
