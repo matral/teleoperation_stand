@@ -3,9 +3,8 @@ package controller.controllers;
 import controller.util.RoboclawsSpeedValues;
 
 public class MecanumDriver {
-	
-	
-	//int xMid = 2048, yMid = 2048, zMid = 2048;
+
+	// int xMid = 2048, yMid = 2048, zMid = 2048;
 	public double limit(double val) {
 		if (val > 1.0)
 			return 1.0;
@@ -13,7 +12,7 @@ public class MecanumDriver {
 			return -1.0;
 		return val;
 	}
-	
+
 	void normalize(double[] vals) {
 		double max = 0;
 
@@ -26,39 +25,48 @@ public class MecanumDriver {
 				vals[i] /= max;
 	}
 
-	
-	public RoboclawsSpeedValues mecanumDrive(double magnitude, double direction, double rotation) {
-		
-		RoboclawsSpeedValues roboclawsSpeedValues = new RoboclawsSpeedValues(0, 0, 0, 0);
-		
+	public RoboclawsSpeedValues mecanumDrive(double magnitude,
+			double direction, double rotation) {
+
+		RoboclawsSpeedValues roboclawsSpeedValues = new RoboclawsSpeedValues(0,
+				0, 0, 0);
+
 		int frontRightDir = 1;
 		int frontLeftDir = 1;
 		int rearRightDir = 1;
 		int rearLeftDir = 1;
-		
+
 		double m_maxOutput = 100.0;
-		
+
 		// Limit limits magnitude to 1.0
 		magnitude = limit(magnitude);
-		System.out.println("magnitude  " + magnitude);
-		System.out.println("direction " + direction);
-		System.out.println("rotation  " + rotation);
+		boolean isDebugEnabled = false;
+		if (isDebugEnabled) {
+			System.out.println("magnitude  " + magnitude);
+			System.out.println("direction " + direction);
+			System.out.println("rotation  " + rotation);
+		}
 		// Normalized for full power along the Cartesian axes.
 		magnitude = magnitude * Math.sqrt(2.0);
-		
-		// magnitude has value from 0 to 1.41, direction has value from 0 to 360 and rotation has value from -1 to 1
+
+		// magnitude has value from 0 to 1.41, direction has value from 0 to 360
+		// and rotation has value from -1 to 1
 		double rollers = 45.0;
 		// The rollers are at 45 degree angles.
-		double dirInRad = (direction +rollers) * Math.PI / 180.0;
+		double dirInRad = (direction + rollers) * Math.PI / 180.0;
 		double cosD = Math.cos(dirInRad);
 		double sinD = Math.sin(dirInRad);
 		double[] wheelSpeeds = new double[4];
-		
+
 		dirInRad = -dirInRad;
-		System.out.println("dir in rad " + dirInRad);
-		System.out.println("cosD " + cosD);
-		System.out.println("sinD " + sinD);
-		
+
+		if (isDebugEnabled) {
+			System.out.println("dir in rad " + dirInRad);
+			System.out.println("cosD " + cosD);
+			System.out.println("sinD " + sinD);
+		}
+		isDebugEnabled = false;
+
 		wheelSpeeds[0] = sinD * magnitude + rotation;
 		wheelSpeeds[1] = cosD * magnitude - rotation;
 		wheelSpeeds[2] = cosD * magnitude + rotation;
@@ -66,24 +74,30 @@ public class MecanumDriver {
 
 		// Only if any are > 1.0
 		normalize(wheelSpeeds);
-		
-		roboclawsSpeedValues.setRoboclawsSpeedValues(
-				wheelSpeeds[0] * m_maxOutput * frontLeftDir, 
-				wheelSpeeds[1] * m_maxOutput * frontRightDir, 
-				wheelSpeeds[2] * m_maxOutput * rearLeftDir, 
+
+		roboclawsSpeedValues.setRoboclawsSpeedValues(wheelSpeeds[0]
+				* m_maxOutput * frontLeftDir, wheelSpeeds[1] * m_maxOutput
+				* frontRightDir, wheelSpeeds[2] * m_maxOutput * rearLeftDir,
 				wheelSpeeds[3] * m_maxOutput * rearRightDir);
-		
+
 		return roboclawsSpeedValues;
 	}
-	
-public RoboclawsSpeedValues joystickDrive(double x, double y, double z) {
-	
+
+	public RoboclawsSpeedValues joystickDrive(double x, double y, double z) {
+
 		double heading = 0, headingLockPoint = 0;
-	
+
+		boolean isDebugEnabled = true;
+		if (isDebugEnabled) {
+			System.out.println("left right:  " + x);
+			System.out.println("forward backward " + y);
+			System.out.println("axis left right: " + z);
+		}
+		isDebugEnabled = false;
 		// Dead Space
 		double xyDeadSpace = 0;
 		double zDeadSpace = 0;
-		
+
 		// Check that the position is outside the deadspace
 		double newx = (Math.abs(x) - xyDeadSpace) * (xyDeadSpace + 1);
 		if (newx < 0)
@@ -102,14 +116,10 @@ public RoboclawsSpeedValues joystickDrive(double x, double y, double z) {
 		y = limit(y);
 		z = limit(z);
 
-		
-		
 		double magnitude = Math.sqrt(x * x + y * y);
 		double direction = Math.atan2(x, y);
 		double rotation = z;
-		
-		
-		
+
 		if (magnitude == 0)
 			direction = 0;
 
@@ -126,9 +136,8 @@ public RoboclawsSpeedValues joystickDrive(double x, double y, double z) {
 			direction += 360;
 		if (direction > 360)
 			direction -= 360;
-		
+
 		return mecanumDrive(magnitude, direction, rotation);
 	}
-	
-	
+
 }

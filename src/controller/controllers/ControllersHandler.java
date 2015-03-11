@@ -20,6 +20,7 @@ import pl.edu.agh.amber.common.AmberClient;
 import pl.edu.agh.amber.hitec.HitecProxy;
 import pl.edu.agh.amber.roboclaw.RoboclawProxy;
 import Leap.LeapCarListener;
+import Leap.LeapCarMinMaxes;
 import Leap.LeapListener;
 import Maestro.PololuConnector;
 import Maestro.Servo;
@@ -59,6 +60,7 @@ public class ControllersHandler {
 	private boolean isDebugEnabled = false;
 	private Hub myoController = null;
 	private DeviceListener myoListener;
+	private Vector zeroVector = null;
 
 	private ConnectionBuilder connection;
 
@@ -91,7 +93,7 @@ public class ControllersHandler {
 			}
 		}
 		sleep = 5;
-		//int keyboardSpeed = 13;
+		// int keyboardSpeed = 13;
 		// setSpeed(keyboardSpeed);
 		Controller[] controllers = ControllerEnvironment
 				.getDefaultEnvironment().getControllers();
@@ -109,7 +111,7 @@ public class ControllersHandler {
 
 		}
 	}
-	
+
 	private void activateJoystickForArm() {
 		if (leapArmController != null) {
 			if (leapArmListener != null) {
@@ -117,7 +119,7 @@ public class ControllersHandler {
 			}
 		}
 		sleep = 5;
-		//int keyboardSpeed = 13;
+		// int keyboardSpeed = 13;
 		// setSpeed(keyboardSpeed);
 		Controller[] controllers = ControllerEnvironment
 				.getDefaultEnvironment().getControllers();
@@ -126,10 +128,14 @@ public class ControllersHandler {
 			if (controller.getType() == Controller.Type.STICK) {
 				// Add new controller to the list of all controllers.
 				joystickArmController = controller;
-
+				createArmSkeleton();
 				// Add new controller to the list on the window.
 			}
 		}
+
+	}
+
+	private void createArmSkeleton() {
 
 	}
 
@@ -140,7 +146,7 @@ public class ControllersHandler {
 			}
 		}
 		sleep = 5;
-		//int keyboardSpeed = 13;
+		// int keyboardSpeed = 13;
 		// setSpeed(keyboardSpeed);
 		Controller[] controllers = ControllerEnvironment
 				.getDefaultEnvironment().getControllers();
@@ -163,7 +169,7 @@ public class ControllersHandler {
 			}
 		}
 		sleep = 5;
-		//int keyboardSpeed = 13;
+		// int keyboardSpeed = 13;
 		// setSpeed(keyboardSpeed);
 		Controller[] controllers = ControllerEnvironment
 				.getDefaultEnvironment().getControllers();
@@ -399,7 +405,7 @@ public class ControllersHandler {
 			break;
 		case "joystick":
 			activateJoystickForArm();
-			
+
 			break;
 		case "phantom":
 			activatePhantomForArm();
@@ -435,11 +441,11 @@ public class ControllersHandler {
 		case "leap":
 			updateArmLeap();
 			break;
-		
-		case "joystick": 
-			updateArmJoystick(); 
+
+		case "joystick":
+			updateArmJoystick();
 			break;
-		
+
 		case "phantom":
 			// updateArmLeap();
 			break;
@@ -606,6 +612,7 @@ public class ControllersHandler {
 
 				}
 				// Get the hand's sphere radius and palm position
+
 				if (isDebugEnabled) {
 					System.out.println("Hand sphere radius: "
 							+ hand.sphereCenter());
@@ -644,35 +651,45 @@ public class ControllersHandler {
 					}
 					if (leapCarController.frame().hands().leftmost()
 							.grabStrength() == 1) {
-						System.out.println("pitch: " + direction.pitch());
-						System.out.println("yaw: " + direction.yaw());
-						System.out.println("roll: " + normal.roll());
-
-						// leapCarListener.setCarPosition()
-						/*
-						 * moveRoboClaws(mecanumDriver, xAxisPercentage,
-						 * yAxisPercentage, zAxisPercentage, getConnection());
-						 */
+						if (isDebugEnabled) {
+							System.out.println("pitch: " + direction.pitch());
+							System.out.println("yaw: " + direction.yaw());
+							System.out.println("roll: " + normal.roll());
+						}
+						LeapCarMinMaxes.ARM_LEFT_RIGHT
+								.setAttributeMinMaxValue(-hand.palmPosition()
+										.getX());
+						moveRoboClaws(mecanumDriver, 50, 50, 50, connection);
 
 					} else {
 						int pitchPercentage;
 						int yawPercentage;
-						int rollPercentage;
+						int leftRightPercentage;
 						int[] calculatedLeapHandPercentage;
+						/*
+						 * calculatedLeapHandPercentage = leapCarListener
+						 * .leapHandPositionsRescaled(direction.pitch(),
+						 * normal.roll(), direction.yaw(), connection);
+						 */
+
 						calculatedLeapHandPercentage = leapCarListener
 								.leapHandPositionsRescaled(direction.pitch(),
-										normal.roll(), direction.yaw(),
-										connection);
+										-hand.palmPosition().getX(),
+										normal.roll(), direction.yaw(), connection);
+						
+					
 						pitchPercentage = calculatedLeapHandPercentage[0];
-						rollPercentage = calculatedLeapHandPercentage[1];
+						leftRightPercentage = calculatedLeapHandPercentage[1];
 						yawPercentage = calculatedLeapHandPercentage[2];
-						
-						
-						System.out.println("pitch: " + pitchPercentage);
-						System.out.println("yaw: " + yawPercentage);
-						System.out.println("roll: " + rollPercentage);
-						//moveRoboClaws(mecanumDriver, pitchPercentage,
-							//	yawPercentage, rollPercentage, connection);
+
+						if (isDebugEnabled) {
+							System.out.println("pitch: " + pitchPercentage);
+							System.out.println("yaw: " + yawPercentage);
+							System.out.println("roll: " + leftRightPercentage);
+						}
+
+						moveRoboClaws(mecanumDriver, leftRightPercentage,
+								pitchPercentage, yawPercentage, connection);
 					}
 
 				}
@@ -966,7 +983,7 @@ public class ControllersHandler {
 		}
 
 		// X axis and Y axis
-		int xAxisPercentage = 0, yAxisPercentage = 0, zAxisPercentage = 0;
+		int xAxisPercentage = 0, yAxisPercentage = 0, zAxisPercentage = 0, sliderPercentage = 0;
 		// JPanel for other axes.
 		JPanel axesPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 25, 2));
 		axesPanel.setBounds(0, 0, 200, 190);
@@ -1038,7 +1055,7 @@ public class ControllersHandler {
 			// Hat switch
 			if (componentIdentifier == Component.Identifier.Axis.POV) {
 				float hatSwitchPosition = component.getPollData();
-				window.setHatSwitch(hatSwitchPosition);
+				window.setArmHatSwitch(hatSwitchPosition);
 
 				// We know that this component was hat switch so we can skip
 				// to next component.
@@ -1068,6 +1085,7 @@ public class ControllersHandler {
 				// Other axis
 				JLabel progressBarLabel = new JLabel(component.getName());
 				JProgressBar progressBar = new JProgressBar(0, 100);
+				sliderPercentage = axisValueInPercentage;
 				progressBar.setValue(axisValueInPercentage);
 				axesPanel.add(progressBarLabel);
 				axesPanel.add(progressBar);
@@ -1079,10 +1097,10 @@ public class ControllersHandler {
 		// set x and y axes,
 		window.setArmXYAxis(xAxisPercentage, yAxisPercentage);
 		// add other axes panel to window.
-		window.addAxisPanel(axesPanel);
+		window.addArmAxisPanel(axesPanel);
 
 	}
-	
+
 	private void updateCarJoystick(MecanumDriver mecanumDriver) {
 
 		int[] keys = { 0, 0, 0, 0, 0, 0 };
@@ -1213,8 +1231,9 @@ public class ControllersHandler {
 		window.setXYAxis(xAxisPercentage, yAxisPercentage);
 		// add other axes panel to window.
 		window.addAxisPanel(axesPanel);
-		moveRoboClaws(mecanumDriver, xAxisPercentage, yAxisPercentage,
-				zAxisPercentage, getConnection());
+		int callibration = 1;
+		moveRoboClaws(mecanumDriver, xAxisPercentage + callibration, yAxisPercentage + callibration,
+				zAxisPercentage + callibration, getConnection());
 	}
 
 	private void updateCar(MecanumDriver mecanumDriver) {
@@ -1331,17 +1350,22 @@ public class ControllersHandler {
 			int xAxisPercentage, int yAxisPercentage, int zAxisPercentage,
 			ConnectionBuilder connection) {
 		double divider = 50.0;
-		int multiplyer = 4, zeroer = 49;
+		int multiplyer = 4, zeroer = 50;
 
+		isDebugEnabled = true;
+		if (isDebugEnabled) {
+			System.out.println("real left right  value: " + xAxisPercentage);
+			System.out.println("real forward backward value: "
+					+ yAxisPercentage);
+			System.out.println("real axes left right  value: "
+					+ zAxisPercentage);
+		}
+		isDebugEnabled = false;
 		// it works with joystick
 		RoboclawsSpeedValues roboclawsSpeedValues = mecanumDriver
 				.joystickDrive((xAxisPercentage - zeroer) / divider,
-						(yAxisPercentage - zeroer - 2) / divider,
+						(yAxisPercentage - zeroer ) / divider,
 						(zAxisPercentage - zeroer) / divider);
-
-		// double[] keys = setKeys();
-
-		// JoystickDrive(keys[0],keys[1],keys[2]);
 
 		try {
 			getConnection().getRoboclawProxy()

@@ -93,7 +93,7 @@ public class JFrameWindow extends javax.swing.JFrame {
 		});
 
 		setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-		setTitle("JInput Joystick Test");
+		setTitle("Teleoperation GUI");
 
 		jPanelAxes.setBorder(javax.swing.BorderFactory.createTitledBorder(null,
 				"Axes", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,

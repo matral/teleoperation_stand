@@ -23,7 +23,7 @@ import controller.util.ConnectionBuilder;
 public class LeapCarListener extends Listener {
 
 	private int last_handPitchRescaled, last_handRollRescaled,
-			last_handYawRescaled;
+			last_handYawRescaled,last_handLeftRight;
 
 	private double epsilon;
 
@@ -32,6 +32,7 @@ public class LeapCarListener extends Listener {
 		last_handRollRescaled = HandInitialValues.ROLL.getValue();
 		last_handPitchRescaled = HandInitialValues.PITCH.getValue();
 		last_handYawRescaled = HandInitialValues.YAW.getValue();
+		last_handLeftRight = HandInitialValues.LEFT_RIGHT.getValue();
 
 		// Percentage Value
 		epsilon = 0.12;
@@ -100,8 +101,10 @@ public class LeapCarListener extends Listener {
 
 	}
 
-	public int[] leapHandPositionsRescaled(double handPitch, double handRoll,
+	public int[] leapHandPositionsRescaled(double handPitch,double handLeftRight, double handRoll,
 			double handYaw, ConnectionBuilder connection) {
+		handPitch = -handPitch;
+
 		
 		int handPitchRescaled = ServosPositionsCalulations
 				.rescaleAndCheckEpsilonEcxeeding(handPitch,
@@ -112,22 +115,37 @@ public class LeapCarListener extends Listener {
 						RoboclawPercentageBoundaries.FORWARD_BACKWARD
 								.getServoMaxValue(), last_handPitchRescaled,
 						RoboclawPercentageBoundaries.FORWARD_BACKWARD
-								.getServoEpsilon());
-
+								.getServoEpsilon(), true);
+		
+		
 		int handRollRescaled = ServosPositionsCalulations
 				.rescaleAndCheckEpsilonEcxeeding(handRoll, LeapCarMinMaxes.ROLL
 						.getAttributeMinValue(), LeapCarMinMaxes.ROLL
 						.getAttributeMaxValue(),
+						RoboclawPercentageBoundaries.YAW_LEFT_RIGHT
+								.getServoMinValue(),
+						RoboclawPercentageBoundaries.YAW_LEFT_RIGHT
+								.getServoMaxValue(), last_handRollRescaled,
+						RoboclawPercentageBoundaries.YAW_LEFT_RIGHT
+								.getServoEpsilon(), true);
+
+	
+		
+		int handLeftRightRescaled = ServosPositionsCalulations
+				.rescaleAndCheckEpsilonEcxeeding(handLeftRight, LeapCarMinMaxes.ARM_LEFT_RIGHT
+						.getAttributeMinValue(), LeapCarMinMaxes.ARM_LEFT_RIGHT
+						.getAttributeMaxValue(),
 						RoboclawPercentageBoundaries.LEFT_RIGHT
 								.getServoMinValue(),
 						RoboclawPercentageBoundaries.LEFT_RIGHT
-								.getServoMaxValue(), last_handRollRescaled,
+								.getServoMaxValue(), last_handLeftRight,
 						RoboclawPercentageBoundaries.LEFT_RIGHT
-								.getServoEpsilon());
-
+								.getServoEpsilon(), true);
+		
+		
 		int handYawRescaled = ServosPositionsCalulations
-				.rescaleAndCheckEpsilonEcxeeding(handYaw, LeapCarMinMaxes.YAW
-						.getAttributeMinValue(), LeapCarMinMaxes.YAW
+				.rescaleAndCheckEpsilonEcxeeding(handYaw, LeapCarMinMaxes.ROLL
+						.getAttributeMinValue(), LeapCarMinMaxes.ROLL
 						.getAttributeMaxValue(),
 						RoboclawPercentageBoundaries.YAW_LEFT_RIGHT
 								.getServoMinValue(),
@@ -137,16 +155,46 @@ public class LeapCarListener extends Listener {
 								.getServoEpsilon());
 
 		if (last_handPitchRescaled != handPitchRescaled) {
-			last_handPitchRescaled = handPitchRescaled;
+			if (handPitchRescaled > 54 || handPitchRescaled < 46) {
+				last_handPitchRescaled = handPitchRescaled;
+			} else {
+				last_handPitchRescaled = 50;
+			}
 		}
+		
 		if (last_handRollRescaled != handRollRescaled) {
-			last_handRollRescaled = handRollRescaled;
+			if (handRollRescaled > 54 || handRollRescaled < 46) {
+				last_handRollRescaled = handRollRescaled;
+			} else {
+				last_handRollRescaled = 50;
+			}
 		}
+		if (last_handLeftRight != handLeftRightRescaled) {
+			if (handLeftRightRescaled > 54 || handLeftRightRescaled < 46) {
+				last_handLeftRight = handLeftRightRescaled;
+			} else {
+				last_handLeftRight = 50;
+			}
+		}
+		
 		if (last_handYawRescaled != handYawRescaled) {
-			last_handYawRescaled = handYawRescaled;
+			if (handYawRescaled > 57 || handYawRescaled < 43) {
+				last_handYawRescaled = handYawRescaled;
+			} else {
+				last_handYawRescaled = 50;
+			}
 		}
-
-		return (new int[]{last_handPitchRescaled,last_handRollRescaled,last_handYawRescaled});
+		
+		System.out.println("hand roll rescaled internal: " + last_handRollRescaled);
+		
+		if(last_handPitchRescaled >40 && last_handPitchRescaled < 60){
+		return (new int[] { last_handPitchRescaled, last_handLeftRight,
+				last_handYawRescaled });
+		}else{
+			System.out.println("second option");
+			return (new int[] { last_handPitchRescaled, last_handLeftRight,
+					last_handRollRescaled });
+		}
 	}
 
 }
