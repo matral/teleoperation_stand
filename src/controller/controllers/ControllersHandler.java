@@ -1092,7 +1092,19 @@ public class ControllersHandler {
 			}
 
 		}
+		
+/*
+sliderPercentage - przepustnica
+yAxisPercentage - przod tyl
 
+xAxisPercentage - bottom
+
+zAxisPercentage - catcher_rotator
+
+przyciski - catcher
+*/
+
+		
 		window.setArmDevicesButtons(buttonsPanel);
 		// set x and y axes,
 		window.setArmXYAxis(xAxisPercentage, yAxisPercentage);
