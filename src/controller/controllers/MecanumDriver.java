@@ -87,7 +87,7 @@ public class MecanumDriver {
 
 		double heading = 0, headingLockPoint = 0;
 
-		boolean isDebugEnabled = true;
+		boolean isDebugEnabled = false;
 		if (isDebugEnabled) {
 			System.out.println("left right:  " + x);
 			System.out.println("forward backward " + y);

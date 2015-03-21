@@ -675,9 +675,9 @@ public class ControllersHandler {
 						calculatedLeapHandPercentage = leapCarListener
 								.leapHandPositionsRescaled(direction.pitch(),
 										-hand.palmPosition().getX(),
-										normal.roll(), direction.yaw(), connection);
-						
-					
+										normal.roll(), direction.yaw(),
+										connection);
+
 						pitchPercentage = calculatedLeapHandPercentage[0];
 						leftRightPercentage = calculatedLeapHandPercentage[1];
 						yawPercentage = calculatedLeapHandPercentage[2];
@@ -1092,25 +1092,203 @@ public class ControllersHandler {
 			}
 
 		}
-		
-/*
-sliderPercentage - przepustnica
-yAxisPercentage - przod tyl
 
-xAxisPercentage - bottom
-
-zAxisPercentage - catcher_rotator
-
-przyciski - catcher
-*/
-
-		
+		/*
+		 * sliderPercentage - przepustnica yAxisPercentage - przod tyl
+		 * 
+		 * xAxisPercentage - bottom
+		 * 
+		 * zAxisPercentage - catcher_rotator
+		 * 
+		 * przyciski - catcher
+		 */
+	
+		set_arm(xAxisPercentage, yAxisPercentage, sliderPercentage, 0);
 		window.setArmDevicesButtons(buttonsPanel);
 		// set x and y axes,
 		window.setArmXYAxis(xAxisPercentage, yAxisPercentage);
 		// add other axes panel to window.
 		window.addArmAxisPanel(axesPanel);
 
+	}
+	double BASE_HGT = 100.00; // base hight 2.65"
+	double HUMERUS = 100.00; // shoulder-to-elbow "bone" 5.75"
+	double ULNA = 50.00; // elbow-to-wrist "bone" 7.375"
+	double GRIPPER = 80.00; // gripper (incl.heavy duty wrist rotate mechanism)
+								// length 3.94"
+	void set_arm_test2(double x, double y, double z, double grip_angle_d) {
+		//x y and z should be 100+
+		double hum_sq = HUMERUS * HUMERUS;
+		double uln_sq = ULNA * ULNA;
+		double grip_angle_r = Math.toRadians(grip_angle_d); // grip angle in
+															// radians for use
+															// in calculations
+		/* Base angle and radial distance from x,y coordinates */
+		double bas_angle_r = Math.atan2(x, y);
+		double rdist = Math.sqrt((x * x) + (y * y));
+		/* rdist is y coordinate for the arm */
+		y = rdist;
+		/* Grip offsets calculated based on grip angle */
+		double grip_off_z = (Math.sin(grip_angle_r)) * GRIPPER;
+		double grip_off_y = (Math.cos(grip_angle_r)) * GRIPPER;
+		/* Wrist position */
+		double wrist_z = (z - grip_off_z) - BASE_HGT;
+		double wrist_y = y - grip_off_y;
+		/* Shoulder to wrist distance ( AKA sw ) */
+		double s_w = (wrist_z * wrist_z) + (wrist_y * wrist_y);
+		double s_w_sqrt = Math.sqrt(s_w);
+		/* s_w angle to ground */
+		// double a1 = atan2( wrist_y, wrist_z );
+		double a1 = Math.atan2(wrist_z, wrist_y);
+		/* s_w angle to humerus */
+		double a2 = Math.acos(((hum_sq - uln_sq) + s_w) / (2 * HUMERUS * s_w_sqrt));
+		/* shoulder angle */
+		double shl_angle_r = a1 + a2;
+		double shl_angle_d = Math.toDegrees(shl_angle_r);
+		/* elbow angle */
+		double elb_angle_r = Math.acos((hum_sq + uln_sq - s_w)
+				/ (2 * HUMERUS * ULNA));
+		double elb_angle_d = Math.toDegrees(elb_angle_r);
+		double elb_angle_dn = -(180.0 - elb_angle_d);
+		
+		/* wrist angle */
+		double wri_angle_d = (grip_angle_d - elb_angle_dn) - shl_angle_d;
+		double bas_angle_d = Math.toDegrees( bas_angle_r );
+			System.out.println("bas_angle_d: " + bas_angle_d);
+			System.out.println("shl_angle_d: " + shl_angle_d);
+			System.out.println("elb_angle_d: " + elb_angle_d);
+			System.out.println("wri_angle_d: " + wri_angle_d);
+
+			if (!(Double.isNaN(bas_angle_d) || Double.isNaN(shl_angle_d) || Double.isNaN(elb_angle_d) || Double
+					.isNaN(wri_angle_d))) {
+
+
+				connection.getHitecProxy().setAngle(
+						Servo.BOTTOM.getServoPort(),
+						(int)bas_angle_d);
+				connection.getHitecProxy().setAngle(
+						Servo.DOF_1.getServoPort(),
+						(int)shl_angle_d);
+				connection.getHitecProxy().setAngle(
+						Servo.DOF_2.getServoPort(),
+						(int)elb_angle_d);
+				connection.getHitecProxy().setAngle(
+						Servo.DOF_3.getServoPort(),
+						(int)wri_angle_d);
+			}
+	}
+	//x - lewo prawo, y - przod tyl, z gora dol
+	// hand servo - catcher rotator
+	// grip servo - catcher
+	// wrist servo - 3dof
+	// elbow servo - 2dof
+	// shoulder servo - 1dof
+	// base servo - bottom 
+	// 90 is middle
+	void set_arm(double x, double y, double z, double grip_angle_d) {
+		// we have a couple of (pseudo) constants which could be pre-computed.
+		// Adapt to your specific robot
+		// my system has a wrist rotor (6DOF arm) which sits between wrist and
+		// gripper. If you don't have this
+		// remove the „wr“ element
+		double bs = 100.00;
+		double se = 100.00;
+		double ew = 50.00;
+		double wg = 80.00;//zle
+		double wr = 0.00;//zle
+		double gr = 60.00; // look in here in case of probnlems
+		// effective gripper/wrist length is wg + wr + some fraction of gr to
+		// hold target tight
+		double grp = wg + wr + 0.75 * gr;
+		double se2 = se * se; // squared values
+		double ew2 = ew * ew;
+		// and a couple of local variables
+		// assume positive y direction is to front. Compensate at higher level
+		// if neccesaary
+		double ba = Math.toDegrees(Math.atan2(x, y)); // base angle to cancel x
+		double yt, zt, yw, zw; // transformed positions of target and wrist
+								// after x-cancelation
+		double sw2, sw; // computed length shoulder to wrist and squared
+		double gar, sa, ea, wa, sw_gnd, sw_se, se_ew, ew_gr; // computed angles
+																// in rad, world
+																// coordinates
+		// compute target position after x transform
+		yt = Math.sqrt((x * x) + (y * y));
+		zt = z; // z unchanged
+		// compute wrist position. assume grip_angle_d = 0 is horizontal,
+		// positive value is upwards hence wrist for pos angle will be BELOW
+		// target
+		gar = Math.toRadians(grip_angle_d); // we subtract the base height
+											// later( or here and then also from
+											// shoulder)
+		zw = zt - grp * Math.sin(gar);
+		if (0.0 > zw)
+			System.out.println("imposiibility"); // shouldn't be negative
+		yw = yt - grp * Math.cos(gar);
+		if (0.0 > yw)
+			System.out.println("impossibility"); 
+		// compute sw, distance shoulder (at y=0) and wrist. compensate base
+		// height if not subtracted already
+		sw2 = (zw - bs) * (zw - bs) + yw * yw; // squared
+		sw = Math.sqrt(sw2);
+		// angle of sw relative to gnd
+		sw_gnd = Math.atan2((zw - bs), yw);
+		// angle sw to se via cosine law see drawing
+		sw_se = Math.acos((sw2 + se2 - ew2) / (2 * se * sw));
+		// angle se to ew via cosine law
+		se_ew = Math.acos((ew2 + se2 - sw2) / (2 * se * ew));
+		// shoulder angle relative to gnd: sw_gnd + sw_se. needs conversion as 0
+		// angle is up in servo world
+		sa = Math.toDegrees(sw_gnd + sw_se);
+		// elbow angle , converted
+		ea = Math.toDegrees(se_ew);
+		// wrist angle: target grip angle minus elbow minis shoulder
+		// initially, wrist is pointing to the direction given by shoulder and
+		// ellbow
+		wa = sa - (180 - ea);
+		// offset to point the gripper to the target direction
+		wa = grip_angle_d - wa;
+		// this is the end of world coordinate computation ...
+		// convert to robot =>
+		// final step is to transform into robot coordinates
+		// the following transformations depend on the actual robot
+		// my system ....
+		// all joints (except base) rotate along X-axis
+		// 0° is upright (in Z) orientation
+		// increasing angles rotate towards front (follow
+		// "right hand rule",positive X to right)
+		sa = -sa;
+		// 0° arm = 90° world, 0° world = 90° arm
+		ea = 180 - ea;
+		// residual angle from triangle cosine lawcalculation
+		wa = -219 + wa;
+		// negated
+		if (-0.1 < ba)
+			ba = 180.0 - ba;
+		else
+			ba = -(180.0 + ba);
+		if (!(Double.isNaN(ba) || Double.isNaN(sa) || Double.isNaN(ea) || Double
+				.isNaN(wa))) {
+			System.out.println("ba: " + ba);
+			System.out.println("sa: " + sa);
+			System.out.println("ea: " + ea);
+			System.out.println("wa: " + wa);
+
+			connection.getHitecProxy().setAngle(
+					Servo.BOTTOM.getServoPort(),
+					(int)ba);
+			connection.getHitecProxy().setAngle(
+					Servo.DOF_1.getServoPort(),
+					(int)sa);
+			connection.getHitecProxy().setAngle(
+					Servo.DOF_2.getServoPort(),
+					(int)ea);
+			connection.getHitecProxy().setAngle(
+					Servo.DOF_3.getServoPort(),
+					(int)wa);
+		} else {
+			System.out.println("nan");
+		}
 	}
 
 	private void updateCarJoystick(MecanumDriver mecanumDriver) {
@@ -1244,8 +1422,9 @@ przyciski - catcher
 		// add other axes panel to window.
 		window.addAxisPanel(axesPanel);
 		int callibration = 1;
-		moveRoboClaws(mecanumDriver, xAxisPercentage + callibration, yAxisPercentage + callibration,
-				zAxisPercentage + callibration, getConnection());
+		moveRoboClaws(mecanumDriver, xAxisPercentage + callibration,
+				yAxisPercentage + callibration, zAxisPercentage + callibration,
+				getConnection());
 	}
 
 	private void updateCar(MecanumDriver mecanumDriver) {
@@ -1364,7 +1543,6 @@ przyciski - catcher
 		double divider = 50.0;
 		int multiplyer = 4, zeroer = 50;
 
-		isDebugEnabled = true;
 		if (isDebugEnabled) {
 			System.out.println("real left right  value: " + xAxisPercentage);
 			System.out.println("real forward backward value: "
@@ -1372,11 +1550,11 @@ przyciski - catcher
 			System.out.println("real axes left right  value: "
 					+ zAxisPercentage);
 		}
-		isDebugEnabled = false;
+
 		// it works with joystick
 		RoboclawsSpeedValues roboclawsSpeedValues = mecanumDriver
 				.joystickDrive((xAxisPercentage - zeroer) / divider,
-						(yAxisPercentage - zeroer ) / divider,
+						(yAxisPercentage - zeroer) / divider,
 						(zAxisPercentage - zeroer) / divider);
 
 		try {
