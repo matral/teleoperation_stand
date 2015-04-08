@@ -32,6 +32,7 @@ import javafx.scene.paint.Paint;
 import javafx.scene.paint.RadialGradientBuilder;
 import javafx.scene.paint.Stop;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Ellipse;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -88,28 +89,16 @@ public class RoboticArm extends Application {
 
         final Bone head = new Bone(20);
         head.setSkeleton(skeleton);
-        head.getContent().add(new Circle(10,
-                RadialGradientBuilder.create()
-                        .centerX(0.25)
-                        .centerY(0.25)
-                        .radius(1)
-                        .stops(new Stop(0.0, Color.RED), new Stop(1.0, Color.DARKRED))
-                .build()));
+        head.getContent().add(new Ellipse());
 
         Bone iterator = head;
 
-        final Paint fill =
-                RadialGradientBuilder.create()
-                        .centerX(0.25)
-                        .centerY(0.25)
-                        .radius(1)
-                        .stops(new Stop(0.0, Color.LIGHTGREEN), new Stop(1.0, Color.GREEN))
-                .build();
 
 
-        for (int i=0; i<15; i++) {
-            final Bone bone = new Bone(20, -60, 60);
-            bone.getContent().add(new Circle(10, fill));
+
+        for (int i=0; i<3; i++) {
+            final Bone bone = new Bone(20, -100, 100);
+            bone.getContent().add(new Ellipse(40, 0, 50, 20));
 
             iterator.getChildren().add(bone);
             iterator = bone;

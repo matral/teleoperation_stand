@@ -25,6 +25,7 @@ import Leap.LeapListener;
 import Maestro.PololuConnector;
 import Maestro.Servo;
 import Maestro.ServosInitialValues;
+import Maestro.ServosPositionsCalulations;
 
 import com.leapmotion.leap.Finger;
 import com.leapmotion.leap.FingerList;
@@ -128,7 +129,6 @@ public class ControllersHandler {
 			if (controller.getType() == Controller.Type.STICK) {
 				// Add new controller to the list of all controllers.
 				joystickArmController = controller;
-				createArmSkeleton();
 				// Add new controller to the list on the window.
 			}
 		}
@@ -169,8 +169,9 @@ public class ControllersHandler {
 			}
 		}
 		sleep = 5;
-		// int keyboardSpeed = 13;
-		// setSpeed(keyboardSpeed);
+		int keyboardSpeed = 13;
+		setSpeed(keyboardSpeed);
+		
 		Controller[] controllers = ControllerEnvironment
 				.getDefaultEnvironment().getControllers();
 		for (int i = 0; i < controllers.length; i++) {
@@ -200,8 +201,8 @@ public class ControllersHandler {
 		window.addArmControllerName("joystick");
 	}
 
-	private void registerPhantomForArm() {
-		window.addArmControllerName("phantom");
+	private void registerJoystick2DForArm() {
+		window.addArmControllerName("joystick2D");
 	}
 
 	private void activateLeapForCar() {
@@ -253,12 +254,27 @@ public class ControllersHandler {
 
 	}
 
-	private void activatePhantomForArm() {
+	private void activateJoystick2DForArm() {
 		if (leapArmController != null) {
 			if (leapArmListener != null) {
 				leapArmController.removeListener(leapArmListener);
 			}
 		}
+		sleep = 5;
+		// int keyboardSpeed = 13;
+		// setSpeed(keyboardSpeed);
+		Controller[] controllers = ControllerEnvironment
+				.getDefaultEnvironment().getControllers();
+		for (int i = 0; i < controllers.length; i++) {
+			Controller controller = controllers[i];
+			if (controller.getType() == Controller.Type.STICK) {
+				// Add new controller to the list of all controllers.
+				joystickArmController = controller;
+				createArmSkeleton();
+				// Add new controller to the list on the window.
+			}
+		}
+
 	}
 
 	private void searchForArmControllers() {
@@ -267,7 +283,7 @@ public class ControllersHandler {
 
 		registerLeapForArm();
 		registerJoystickForArm();
-		// registerPhantomForArm();
+		registerJoystick2DForArm();
 	}
 
 	private void searchForCarControllers() {
@@ -407,8 +423,8 @@ public class ControllersHandler {
 			activateJoystickForArm();
 
 			break;
-		case "phantom":
-			activatePhantomForArm();
+		case "joystick2D":
+			activateJoystick2DForArm();
 			break;
 		}
 	}
@@ -446,8 +462,8 @@ public class ControllersHandler {
 			updateArmJoystick();
 			break;
 
-		case "phantom":
-			// updateArmLeap();
+		case "joystick2D":
+			updateArmJoystick2D();
 			break;
 		}
 
@@ -783,9 +799,11 @@ public class ControllersHandler {
 		}
 		if (controller_arm.getType() == Controller.Type.KEYBOARD) {
 			calculateDirectionOfEachServo(keys_arm);
-
+			isDebugEnabled = true;
 			if (keys_arm[0] + keys_arm[1] != 0) {
-				System.out.println(servosPositions.getBottomPosition());
+				if (isDebugEnabled) {
+					System.out.println(servosPositions.getBottomPosition());
+				}
 				connection.getHitecProxy().setAngle(
 						Servo.BOTTOM.getServoPort(),
 						servosPositions.getBottomPosition());
@@ -795,7 +813,9 @@ public class ControllersHandler {
 				 * Servo.BOTTOM.getServoPort());
 				 */}
 			if (keys_arm[2] + keys_arm[3] != 0) {
-
+				if (isDebugEnabled) {
+					System.out.println(servosPositions.getDOF1Position());
+				}
 				getConnection().getHitecProxy().setAngle(
 						Servo.DOF_1.getServoPort(),
 						servosPositions.getDOF1Position());
@@ -805,6 +825,9 @@ public class ControllersHandler {
 				 */
 			}
 			if (keys_arm[4] + keys_arm[5] != 0) {
+				if (isDebugEnabled) {
+					System.out.println(servosPositions.getDOF2Position());
+				}
 				getConnection().getHitecProxy().setAngle(
 						Servo.DOF_2.getServoPort(),
 						servosPositions.getDOF2Position());
@@ -815,6 +838,9 @@ public class ControllersHandler {
 			}
 
 			if (keys_arm[6] + keys_arm[7] != 0) {
+				if (isDebugEnabled) {
+					System.out.println(servosPositions.getDOF3Position());
+				}
 				getConnection().getHitecProxy().setAngle(
 						Servo.DOF_3.getServoPort(),
 						servosPositions.getDOF3Position());
@@ -825,6 +851,10 @@ public class ControllersHandler {
 			}
 
 			if (keys_arm[8] + keys_arm[9] != 0) {
+				if (isDebugEnabled) {
+					System.out.println(servosPositions
+							.getCatcherRotatorPosition());
+				}
 				getConnection().getHitecProxy().setAngle(
 						Servo.CATCHER_ROTATOR.getServoPort(),
 						servosPositions.getCatcherRotatorPosition());
@@ -836,6 +866,9 @@ public class ControllersHandler {
 			}
 
 			if (keys_arm[10] + keys_arm[11] != 0) {
+				if (isDebugEnabled) {
+					System.out.println(servosPositions.getCatcherPosition());
+				}
 				getConnection().getHitecProxy().setAngle(
 						Servo.CATCHER.getServoPort(),
 						servosPositions.getCatcherPosition());
@@ -844,7 +877,7 @@ public class ControllersHandler {
 				 * , Servo.CATCHER.getServoPort());
 				 */
 			}
-
+			isDebugEnabled = false;
 		}
 	}
 
@@ -967,7 +1000,7 @@ public class ControllersHandler {
 				zAxisPercentage, getConnection());
 	}
 
-	private void updateArmJoystick() {
+	private void updateArmJoystick2D() {
 
 		int[] keys = { 0, 0, 0, 0, 0, 0 };
 
@@ -1102,8 +1135,26 @@ public class ControllersHandler {
 		 * 
 		 * przyciski - catcher
 		 */
-	
-		set_arm(xAxisPercentage, yAxisPercentage, sliderPercentage, 0);
+
+		xAxisPercentage = (int) ServosPositionsCalulations
+				.rescaleValueFromOldMinMax(xAxisPercentage, 0, 100, -140, 140);
+
+		yAxisPercentage = (int) ServosPositionsCalulations
+				.rescaleValueFromOldMinMax(yAxisPercentage, 0, 100, 90, 180);
+
+		yAxisPercentage = 180 + 90 - yAxisPercentage;
+
+		sliderPercentage = (int) ServosPositionsCalulations
+				.rescaleValueFromOldMinMax(sliderPercentage, 0, 100, 112, 180);
+
+		System.out.println("xAxis : " + xAxisPercentage);
+		System.out.println("yAxis : " + yAxisPercentage);
+		System.out.println("zAxis : " + sliderPercentage);
+
+		int adder = 80;
+		setSkeletonAndMoveArm(xAxisPercentage, yAxisPercentage,
+				sliderPercentage);
+
 		window.setArmDevicesButtons(buttonsPanel);
 		// set x and y axes,
 		window.setArmXYAxis(xAxisPercentage, yAxisPercentage);
@@ -1111,13 +1162,323 @@ public class ControllersHandler {
 		window.addArmAxisPanel(axesPanel);
 
 	}
-	double BASE_HGT = 100.00; // base hight 2.65"
+
+	private void setSkeletonAndMoveArm(double x, double y, double z) {
+
+	}
+
+	private void updateArmJoystick() {
+
+		int[] keys = { 0, 0 };
+
+		// Currently selected controller.
+
+		Controller controller = joystickArmController;
+
+		// Pull controller for current data, and break while loop if
+		// controller is disconnected.
+		if (!controller.poll()) {
+			window.showArmDevicesNameDisconnected();
+			return;
+		}
+
+		// X axis and Y axis
+		int xAxisPercentage = 0, yAxisPercentage = 0, zAxisPercentage = 0, sliderPercentage = 0;
+		// JPanel for other axes.
+		JPanel axesPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 25, 2));
+		axesPanel.setBounds(0, 0, 200, 190);
+
+		// JPanel for controller buttons
+		JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 1, 1));
+		buttonsPanel.setBounds(6, 19, 250, 210);
+
+		// Go trough all components of the controller.
+		Component[] components = controller.getComponents();
+
+		// car controllers
+		for (int i = 0; i < components.length; i++) {
+			Component component = components[i];
+
+			Identifier componentIdentifier = component.getIdentifier();
+
+			// Buttons
+			// if(component.getName().contains("Button")){ // If the
+			// language is not english, this won't work.
+			if (componentIdentifier.getName().matches("^[0-9]*$")
+					|| componentIdentifier.getName().matches("^[A-Z]*$")) {
+				// Is button pressed?
+				boolean isItPressed = true;
+				if (component.getPollData() == 0.0f)
+					isItPressed = false;
+
+				// Button index
+				String buttonIndex;
+				buttonIndex = component.getIdentifier().toString();
+
+				// Create and add new button to panel.
+				JToggleButton aToggleButton = new JToggleButton(buttonIndex,
+						isItPressed);
+				aToggleButton.setPreferredSize(new Dimension(48, 25));
+				aToggleButton.setEnabled(false);
+				buttonsPanel.add(aToggleButton);
+
+				if (isItPressed) {
+					switch (componentIdentifier.getName()) {
+					case "2":
+						keys[0] = 1;
+						break;
+					case "3":
+						keys[1] = 1;
+						break;
+
+					default:
+					}
+				}
+
+				// We know that this component was button so we can skip to
+				// next component.
+				continue;
+			}
+			// else{System.out.println(componentIdentifier.getName());}
+			// Hat switch
+			if (componentIdentifier == Component.Identifier.Axis.POV) {
+				float hatSwitchPosition = component.getPollData();
+				window.setArmHatSwitch(hatSwitchPosition);
+
+				// We know that this component was hat switch so we can skip
+				// to next component.
+				continue;
+			}
+
+			// Axes
+			if (component.isAnalog()) {
+
+				int axisValueInPercentage = Util
+						.getAxisValueInPercentage(component.getPollData());
+
+				// X axis
+				if (componentIdentifier == Component.Identifier.Axis.X) {
+					xAxisPercentage = axisValueInPercentage;
+					continue; // Go to next component.
+				}
+				// Y axis
+				if (componentIdentifier == Component.Identifier.Axis.Y) {
+					yAxisPercentage = axisValueInPercentage;
+					continue; // Go to next component.
+				}
+				if (componentIdentifier == Component.Identifier.Axis.RZ) {
+					zAxisPercentage = axisValueInPercentage;
+					continue; // Go to next component.
+				}
+				// Other axis
+				JLabel progressBarLabel = new JLabel(component.getName());
+				JProgressBar progressBar = new JProgressBar(0, 100);
+				sliderPercentage = axisValueInPercentage;
+				progressBar.setValue(axisValueInPercentage);
+				axesPanel.add(progressBarLabel);
+				axesPanel.add(progressBar);
+			}
+
+		}
+
+		/*
+		 * sliderPercentage - przepustnica yAxisPercentage - przod tyl
+		 * 
+		 * xAxisPercentage - bottom
+		 * 
+		 * zAxisPercentage - catcher_rotator
+		 * 
+		 * przyciski - catcher
+		 */
+
+		xAxisPercentage = (int) ServosPositionsCalulations
+				.rescaleValueFromOldMinMax(xAxisPercentage, 0, 100, -49, 50);
+		
+		xAxisPercentage = 50 -49 - xAxisPercentage;
+		yAxisPercentage = (int) ServosPositionsCalulations
+				.rescaleValueFromOldMinMax(yAxisPercentage, 0, 100, 1, 180);
+		zAxisPercentage = (int) ServosPositionsCalulations
+				.rescaleValueFromOldMinMax(zAxisPercentage, 0, 100, 1, 180);
+
+		yAxisPercentage = 180 + 1 -yAxisPercentage; 
+		sliderPercentage = (int) ServosPositionsCalulations
+				.rescaleValueFromOldMinMax(sliderPercentage, 0, 100, 1, 80);
+		
+		sliderPercentage = 80 + 1  - sliderPercentage;
+		
+		System.out.println("yAxis : " + xAxisPercentage);
+		System.out.println("xAxis : " + yAxisPercentage);
+		System.out.println("zAxis : " + sliderPercentage);
+
+		
+		
+		calculateGripStrength(keys);
+
+		if (keys[0] + keys[1] != 0) {
+			if (isDebugEnabled) {
+				System.out.println(servosPositions.getBottomPosition());
+			}
+			connection.getHitecProxy().setAngle(
+					Servo.CATCHER.getServoPort(),
+					servosPositions.getCatcherPosition());
+		}
+		
+		set_arm_own(yAxisPercentage,xAxisPercentage,sliderPercentage,zAxisPercentage);
+		window.setArmDevicesButtons(buttonsPanel);
+		// set x and y axes,
+		window.setArmXYAxis(xAxisPercentage, yAxisPercentage);
+		// add other axes panel to window.
+		window.addArmAxisPanel(axesPanel);
+
+	}
+	
+		double a =100;
+	    double b = 100;
+	    double ed = 90;
+	    
+	    void set_arm_own(double x, double y, double z, double grip_angle_d){
+	    	
+	    	double temp_x = x;
+	    	double l = Math.sqrt(x*x + y*y);
+	    	double base_angle_r = Math.atan(y/x);
+	    	x = l;
+	    	z = z + ed;
+	    	double c = Math.sqrt((x*x) + (z*z));
+	    	double dof2_angle_r = Math.acos((a*a+b*b-c*c)/(2*a*b));
+	    	double theta = Math.acos((c*c+b*b-a*a)/(2*b*c));
+	    	double ang = Math.atan(z/x) + theta;
+	    	double dof1_angle_r = Math.atan(z/x) + theta;
+	    	double x1 = b*Math.cos(ang);
+	    	double z1 = b*Math.sin(ang);
+	    	double d = Math.sqrt((x-x1)*(x-x1) + (z-ed-z1)*(z-ed-z1));
+	    	double dof3_angle_r = Math.acos((a*a+ed*ed-d*d)/(2*a*ed));
+	    	double bottom_angle_r = Math.atan(y/temp_x);
+	    	
+	    	double bottom_angle_d = Math.toDegrees(bottom_angle_r);
+	    	double dof1_angle_d = Math.toDegrees(dof1_angle_r);
+	    	double dof2_angle_d = Math.toDegrees(dof2_angle_r);
+	    	double dof3_angle_d = Math.toDegrees(dof3_angle_r);
+	    	bottom_angle_d += 90;
+	    	
+	    	//bottom_angle_d += 90;
+	    	dof2_angle_d = 180 - dof2_angle_d;
+	    	//dof3_angle_d = 180 -dof3_angle_d;
+	    	dof1_angle_d +=20;
+			
+			if (!( Double.isNaN(dof1_angle_d) ||Double.isNaN(bottom_angle_d)
+					|| Double.isNaN(dof2_angle_d) || Double.isNaN(dof3_angle_d))) {
+				System.out.println("bottom_angle_d: " + bottom_angle_d);
+		    	System.out.println("dof1_angle_d: " + dof1_angle_d);
+				System.out.println("dof2_angle_d: " + dof2_angle_d);
+				System.out.println("dof3_angle_d: " + dof3_angle_d);
+				
+				if (bottom_angle_d > 0 && bottom_angle_d < 180) {
+					connection.getHitecProxy().setAngle(Servo.BOTTOM.getServoPort(),
+							(int) bottom_angle_d);
+				}
+				if (dof1_angle_d > 0 && dof1_angle_d < 180) {
+					connection.getHitecProxy().setAngle(Servo.DOF_1.getServoPort(),
+							(int) dof1_angle_d);
+				}
+				if (dof2_angle_d > 0 && dof2_angle_d < 180) {
+					connection.getHitecProxy().setAngle(Servo.DOF_2.getServoPort(),
+							(int) dof2_angle_d);
+				}
+				if (dof3_angle_d > 0 && dof3_angle_d < 180) {
+					connection.getHitecProxy().setAngle(Servo.DOF_3.getServoPort(),
+							(int) dof3_angle_d);
+				}
+				if (grip_angle_d > 0 && grip_angle_d < 180) {
+					connection.getHitecProxy().setAngle(Servo.CATCHER_ROTATOR.getServoPort(),
+							(int) grip_angle_d);
+				}
+
+			}
+			
+	    }
+
+	public void arms(double a1, double a2, double a3, double a4, double l2,
+			double l3, double l4) {
+		int ex = 1, ey = 1, ez = 1;
+		double er = Math.cos(a1) * ex + Math.sin(a1) * ey;
+		double u2 = l2 * (Math.cos(a2) * er + Math.sin(a2) * ez);
+		double u3 = l3 * (Math.cos(a2 + a3) * er + Math.sin(a2 + a3) * ez);
+		double u4 = l4 * (Math.cos(a2 + a3 + a4) * er + Math.sin(a2 + a3 + a4) * ez);
+		System.out.println("x:  " + u2 + "y: " + u3 + "z: " + u4);
+	}
+
+	
+							// length 3.94"
+	//double BASE_HGT = 100.00; // base hight 2.65"
+	//double HUMERUS = 100.00; // shoulder-to-elbow "bone" 5.75"
+	//double ULNA = 100.00; // elbow-to-wrist "bone" 7.375"
+	//double GRIPPER = 100.00; // gripper (incl.heavy duty wrist rotate mechanism)
+	void set_arm_test3(double x, double y, double z, double grip_angle_d) {
+		double base_angle_r = Math.atan2(y, x);
+		double r = Math.hypot(x, y) - GRIPPER;
+		double u3 = (r * r + z * z - HUMERUS * HUMERUS - ULNA * ULNA)
+				/ (2 * HUMERUS * ULNA);
+		double elb_angle_r = -Math.acos(u3);
+		double v = HUMERUS + ULNA * u3;
+		double w = -ULNA * Math.sqrt(1 - u3 * u3);
+		double shl_angle_r = Math.atan2(v * z - w * r, v * r + w * z);
+		double wri_angle_r = -shl_angle_r - elb_angle_r;
+
+		double base_angle_d = Math.toDegrees(base_angle_r);
+		double shl_angle_d = Math.toDegrees(shl_angle_r);
+		double elb_angle_d = Math.toDegrees(elb_angle_r);
+		double wri_angle_d = Math.toDegrees(wri_angle_r);
+		
+		
+		wri_angle_d += 75;
+		elb_angle_d = - elb_angle_d - 40;
+		
+		//elb_angle_d = -elb_angle_d - 50;
+		//wri_angle_d += 50;
+		/* conversion */
+		/*
+		 * base_angle_d += 91; elb_angle_d += 55; wri_angle_d += 30; shl_angle_d
+		 * +=54;
+		 */
+		
+		System.out.println("bas_angle_d: " + base_angle_d);
+		System.out.println("shl_angle_d: " + shl_angle_d);
+		System.out.println("elb_angle_d: " + elb_angle_d);
+		System.out.println("wri_angle_d: " + wri_angle_d);
+
+		if (!(Double.isNaN(base_angle_d) || Double.isNaN(shl_angle_d)
+				|| Double.isNaN(elb_angle_d) || Double.isNaN(wri_angle_d))) {
+			if (base_angle_d > 0 && base_angle_d < 180) {
+				connection.getHitecProxy().setAngle(
+						Servo.BOTTOM.getServoPort(), (int) base_angle_d);
+			}
+			if (shl_angle_d > 0 && shl_angle_d < 180) {
+				connection.getHitecProxy().setAngle(Servo.DOF_1.getServoPort(),
+						(int) shl_angle_d);
+			}
+			if (elb_angle_d > 0 && elb_angle_d < 180) {
+				connection.getHitecProxy().setAngle(Servo.DOF_2.getServoPort(),
+						(int) elb_angle_d);
+			}
+			if (wri_angle_d > 0 && wri_angle_d < 180) {
+				connection.getHitecProxy().setAngle(Servo.DOF_3.getServoPort(),
+						(int) wri_angle_d);
+			}
+
+		}
+
+	}
+	double BASE_HGT = 50.00; // base hight 2.65"
 	double HUMERUS = 100.00; // shoulder-to-elbow "bone" 5.75"
-	double ULNA = 50.00; // elbow-to-wrist "bone" 7.375"
-	double GRIPPER = 80.00; // gripper (incl.heavy duty wrist rotate mechanism)
-								// length 3.94"
+    double ULNA = 100.00; // elbow-to-wrist "bone" 7.375"
+    double GRIPPER = 100.00; // gripper (incl.heavy duty wrist rotate mechanism)
+    
+    //double a = 100;
+    //double b = 100;
+    //double ed = 100;
+    
+   
 	void set_arm_test2(double x, double y, double z, double grip_angle_d) {
-		//x y and z should be 100+
 		double hum_sq = HUMERUS * HUMERUS;
 		double uln_sq = ULNA * ULNA;
 		double grip_angle_r = Math.toRadians(grip_angle_d); // grip angle in
@@ -1141,7 +1502,8 @@ public class ControllersHandler {
 		// double a1 = atan2( wrist_y, wrist_z );
 		double a1 = Math.atan2(wrist_z, wrist_y);
 		/* s_w angle to humerus */
-		double a2 = Math.acos(((hum_sq - uln_sq) + s_w) / (2 * HUMERUS * s_w_sqrt));
+		double a2 = Math.acos(((hum_sq - uln_sq) + s_w)
+				/ (2 * HUMERUS * s_w_sqrt));
 		/* shoulder angle */
 		double shl_angle_r = a1 + a2;
 		double shl_angle_d = Math.toDegrees(shl_angle_r);
@@ -1150,40 +1512,53 @@ public class ControllersHandler {
 				/ (2 * HUMERUS * ULNA));
 		double elb_angle_d = Math.toDegrees(elb_angle_r);
 		double elb_angle_dn = -(180.0 - elb_angle_d);
-		
+
 		/* wrist angle */
 		double wri_angle_d = (grip_angle_d - elb_angle_dn) - shl_angle_d;
-		double bas_angle_d = Math.toDegrees( bas_angle_r );
-			System.out.println("bas_angle_d: " + bas_angle_d);
-			System.out.println("shl_angle_d: " + shl_angle_d);
-			System.out.println("elb_angle_d: " + elb_angle_d);
-			System.out.println("wri_angle_d: " + wri_angle_d);
+		double bas_angle_d = Math.toDegrees(bas_angle_r);
 
-			if (!(Double.isNaN(bas_angle_d) || Double.isNaN(shl_angle_d) || Double.isNaN(elb_angle_d) || Double
-					.isNaN(wri_angle_d))) {
+		/* conversion */
+		
+		bas_angle_d = 90 - bas_angle_d;
+		shl_angle_d += 10;
+		elb_angle_d = 180 - elb_angle_d + 40;
+		wri_angle_d = 180 - wri_angle_d + 30;
+		
 
+		System.out.println("bas_angle_d: " + bas_angle_d);
+		System.out.println("shl_angle_d: " + shl_angle_d);
+		System.out.println("elb_angle_d: " + elb_angle_d);
+		System.out.println("wri_angle_d: " + wri_angle_d);
 
+		if (!(Double.isNaN(bas_angle_d) || Double.isNaN(shl_angle_d)
+				|| Double.isNaN(elb_angle_d) || Double.isNaN(wri_angle_d))) {
+			if (bas_angle_d > 0 && bas_angle_d < 180) {
 				connection.getHitecProxy().setAngle(
-						Servo.BOTTOM.getServoPort(),
-						(int)bas_angle_d);
-				connection.getHitecProxy().setAngle(
-						Servo.DOF_1.getServoPort(),
-						(int)shl_angle_d);
-				connection.getHitecProxy().setAngle(
-						Servo.DOF_2.getServoPort(),
-						(int)elb_angle_d);
-				connection.getHitecProxy().setAngle(
-						Servo.DOF_3.getServoPort(),
-						(int)wri_angle_d);
+						Servo.BOTTOM.getServoPort(), (int) bas_angle_d);
 			}
+			if (shl_angle_d > 0 && shl_angle_d < 180) {
+				connection.getHitecProxy().setAngle(Servo.DOF_1.getServoPort(),
+						(int) shl_angle_d);
+			}
+			if (elb_angle_d > 0 && elb_angle_d < 180) {
+				connection.getHitecProxy().setAngle(Servo.DOF_2.getServoPort(),
+						(int) elb_angle_d);
+			}
+			if (wri_angle_d > 0 && wri_angle_d < 180) {
+				connection.getHitecProxy().setAngle(Servo.DOF_3.getServoPort(),
+						(int) wri_angle_d);
+			}
+
+		}
 	}
-	//x - lewo prawo, y - przod tyl, z gora dol
+
+	// x - lewo prawo, y - przod tyl, z gora dol
 	// hand servo - catcher rotator
 	// grip servo - catcher
 	// wrist servo - 3dof
 	// elbow servo - 2dof
 	// shoulder servo - 1dof
-	// base servo - bottom 
+	// base servo - bottom
 	// 90 is middle
 	void set_arm(double x, double y, double z, double grip_angle_d) {
 		// we have a couple of (pseudo) constants which could be pre-computed.
@@ -1194,8 +1569,8 @@ public class ControllersHandler {
 		double bs = 100.00;
 		double se = 100.00;
 		double ew = 50.00;
-		double wg = 80.00;//zle
-		double wr = 0.00;//zle
+		double wg = 80.00;// zle
+		double wr = 0.00;// zle
 		double gr = 60.00; // look in here in case of probnlems
 		// effective gripper/wrist length is wg + wr + some fraction of gr to
 		// hold target tight
@@ -1226,7 +1601,7 @@ public class ControllersHandler {
 			System.out.println("imposiibility"); // shouldn't be negative
 		yw = yt - grp * Math.cos(gar);
 		if (0.0 > yw)
-			System.out.println("impossibility"); 
+			System.out.println("impossibility");
 		// compute sw, distance shoulder (at y=0) and wrist. compensate base
 		// height if not subtracted already
 		sw2 = (zw - bs) * (zw - bs) + yw * yw; // squared
@@ -1274,18 +1649,14 @@ public class ControllersHandler {
 			System.out.println("ea: " + ea);
 			System.out.println("wa: " + wa);
 
-			connection.getHitecProxy().setAngle(
-					Servo.BOTTOM.getServoPort(),
-					(int)ba);
-			connection.getHitecProxy().setAngle(
-					Servo.DOF_1.getServoPort(),
-					(int)sa);
-			connection.getHitecProxy().setAngle(
-					Servo.DOF_2.getServoPort(),
-					(int)ea);
-			connection.getHitecProxy().setAngle(
-					Servo.DOF_3.getServoPort(),
-					(int)wa);
+			connection.getHitecProxy().setAngle(Servo.BOTTOM.getServoPort(),
+					(int) ba);
+			connection.getHitecProxy().setAngle(Servo.DOF_1.getServoPort(),
+					(int) sa);
+			connection.getHitecProxy().setAngle(Servo.DOF_2.getServoPort(),
+					(int) ea);
+			connection.getHitecProxy().setAngle(Servo.DOF_3.getServoPort(),
+					(int) wa);
 		} else {
 			System.out.println("nan");
 		}
@@ -1465,7 +1836,7 @@ public class ControllersHandler {
 		initializeArm();
 		sleep = 200;
 		while (true) {
-
+			sleep = 200;
 			updateArm(mecanumDriver);
 			updateCar(mecanumDriver);
 
@@ -1482,7 +1853,14 @@ public class ControllersHandler {
 		// for end
 
 	}
+	private int[] calculateGripStrength(int[] keys) {
+		int[] calculateServosMovement = { 0, 0, 0, 0, 0, 0 };
+		int sum12 = keys[0] + keys[1];
+		servosPositions.setCatcherPosition(servosPositions.getCatcherPosition()
+				+ compareArmKeysWithValue(sum12, keys[0],10));
 
+		return calculateServosMovement;
+	}
 	private int[] calculateDirectionOfEachServo(int[] keys) {
 		int[] calculateServosMovement = { 0, 0, 0, 0, 0, 0 };
 		int sumNM = keys[0] + keys[1], sumGV = keys[2] + keys[3], sumUH = keys[4]
@@ -1512,6 +1890,16 @@ public class ControllersHandler {
 				return -2;
 			else
 				return 2;
+		}
+	}
+	private int compareArmKeysWithValue(int sum, int key, int value) {
+		if (sum == 2 || sum == 0) {
+			return 0;
+		} else {
+			if (key == 1)
+				return -value;
+			else
+				return value;
 		}
 	}
 
