@@ -62,7 +62,7 @@ public class ControllersHandler {
 	private Hub myoController = null;
 	private DeviceListener myoListener;
 	private Vector zeroVector = null;
-
+	private boolean joystickControllsCar = true;
 	private ConnectionBuilder connection;
 
 	private boolean isLeapListenerConnected = false;
@@ -120,8 +120,8 @@ public class ControllersHandler {
 			}
 		}
 		sleep = 5;
-		// int keyboardSpeed = 13;
-		// setSpeed(keyboardSpeed);
+		int joystickSpeed = 4;
+		setSpeed(joystickSpeed);
 		Controller[] controllers = ControllerEnvironment
 				.getDefaultEnvironment().getControllers();
 		for (int i = 0; i < controllers.length; i++) {
@@ -143,6 +143,7 @@ public class ControllersHandler {
 		if (leapCarController != null) {
 			if (leapCarListener != null) {
 				leapCarController.removeListener(leapCarListener);
+				leapCarController = null;
 			}
 		}
 		sleep = 5;
@@ -162,6 +163,8 @@ public class ControllersHandler {
 
 	}
 
+	boolean first_time = true;
+
 	private void activateKeyboardForArm() {
 		if (leapArmController != null) {
 			if (leapArmListener != null) {
@@ -169,9 +172,13 @@ public class ControllersHandler {
 			}
 		}
 		sleep = 5;
-		int keyboardSpeed = 13;
-		setSpeed(keyboardSpeed);
-		
+		if (!first_time) {
+			basicPosition();
+			int keyboardSpeed = 13;
+			setSpeed(keyboardSpeed);
+		}
+		first_time = false;
+
 		Controller[] controllers = ControllerEnvironment
 				.getDefaultEnvironment().getControllers();
 		for (int i = 0; i < controllers.length; i++) {
@@ -216,8 +223,8 @@ public class ControllersHandler {
 
 	private void activateLeapForArm() {
 		sleep = 40;
-		// int leapSpeed = 30;
-		// setSpeed(leapSpeed);
+		int leapSpeed = 200;
+		setSpeed(leapSpeed);
 		leapArmListener = new LeapListener();
 		if (leapArmController == null) {
 			leapArmController = new com.leapmotion.leap.Controller();
@@ -399,6 +406,32 @@ public class ControllersHandler {
 				ServosInitialValues.DOF_3.getInitialPosition(),
 				ServosInitialValues.CATCHER_ROTATOR.getInitialPosition(),
 				ServosInitialValues.CATCHER.getInitialPosition());
+
+		getConnection().getHitecProxy().setAngle(
+				ServosInitialValues.CATCHER.getInitialPosition(),
+				Servo.CATCHER.getServoPort());
+	}
+
+	public void basicPosition() {
+		getConnection().getHitecProxy().setAngle(
+				ServosInitialValues.BOTTOM.getInitialPosition(),
+				Servo.BOTTOM.getServoPort());
+
+		getConnection().getHitecProxy().setAngle(
+				ServosInitialValues.DOF_1.getInitialPosition(),
+				Servo.DOF_1.getServoPort());
+
+		getConnection().getHitecProxy().setAngle(
+				ServosInitialValues.DOF_2.getInitialPosition(),
+				Servo.DOF_2.getServoPort());
+
+		getConnection().getHitecProxy().setAngle(
+				ServosInitialValues.DOF_3.getInitialPosition(),
+				Servo.DOF_3.getServoPort());
+
+		getConnection().getHitecProxy().setAngle(
+				ServosInitialValues.CATCHER_ROTATOR.getInitialPosition(),
+				Servo.CATCHER_ROTATOR.getServoPort());
 	}
 
 	private void setSpeed(int speed) {
@@ -583,20 +616,27 @@ public class ControllersHandler {
 						leapArmListener.setLipMinMaxesStaticValues();
 
 						if (!window.isAtLeastOneBoundaryCheckBoxSelected()) {
-							window.setArmStateInfo("Arm is running with customized boundaries");
-							leapArmListener.setServos(
-									hand.palmPosition().getX(),
-									hand.palmPosition().getY(),
-									-hand.palmPosition().getZ(),
-									direction.pitch(),
-									normal.roll(),
-									-avgPos.getY(),
-									fingers.get(2)
-											.tipPosition()
-											.distanceTo(
-													fingers.get(3)
-															.tipPosition()),
-									getConnection());
+							if ((window.getSelectedCarDevicesName().equals(
+									"leap") && frame.hands().count() == 2)
+									|| !window.getSelectedCarDevicesName()
+											.equals("leap")) {
+
+								window.setArmStateInfo("Arm is running with customized boundaries");
+								leapArmListener
+										.setServos(
+												hand.palmPosition().getX(),
+												hand.palmPosition().getY(),
+												-hand.palmPosition().getZ(),
+												direction.pitch(),
+												normal.roll(),
+												-avgPos.getY(),
+												fingers.get(2)
+														.tipPosition()
+														.distanceTo(
+																fingers.get(3)
+																		.tipPosition()),
+												getConnection());
+							}
 						} else {
 							window.setArmStateInfo("Arm is not running | Select which DOF boundarie is going to be changed");
 						}
@@ -613,7 +653,7 @@ public class ControllersHandler {
 			Frame frame = leapCarController.frame();
 			if (!frame.hands().isEmpty()) {
 				// Get the first hand
-				Hand hand = frame.hands().rightmost();
+				Hand hand = frame.hands().leftmost();
 
 				// Check if the hand has any fingers
 				FingerList fingers = hand.fingers();
@@ -703,9 +743,13 @@ public class ControllersHandler {
 							System.out.println("yaw: " + yawPercentage);
 							System.out.println("roll: " + leftRightPercentage);
 						}
-
-						moveRoboClaws(mecanumDriver, leftRightPercentage,
-								pitchPercentage, yawPercentage, connection);
+						if ((window.getSelectedArmDevicesName().equals("leap") && frame
+								.hands().count() == 2)
+								|| !window.getSelectedArmDevicesName().equals(
+										"leap")) {
+							moveRoboClaws(mecanumDriver, leftRightPercentage,
+									pitchPercentage, yawPercentage, connection);
+						}
 					}
 
 				}
@@ -751,34 +795,34 @@ public class ControllersHandler {
 
 				if (isItPressed) {
 					switch (componentIdentifier_arm.getName()) {
-					case "N":
+					case "M":
 						keys_arm[0] = 1;
 						break;
-					case "M":
+					case "N":
 						keys_arm[1] = 1;
 						break;
-					case "V":
+					case "G":
 						keys_arm[2] = 1;
 						break;
-					case "G":
+					case "V":
 						keys_arm[3] = 1;
 						break;
-					case "U":
+					case "H":
 						keys_arm[4] = 1;
 						break;
-					case "H":
+					case "U":
 						keys_arm[5] = 1;
 						break;
-					case "I":
+					case "9":
 						keys_arm[6] = 1;
 						break;
-					case "9":
+					case "I":
 						keys_arm[7] = 1;
 						break;
-					case "K":
+					case "J":
 						keys_arm[8] = 1;
 						break;
-					case "J":
+					case "K":
 						keys_arm[9] = 1;
 						break;
 					case "O":
@@ -798,7 +842,7 @@ public class ControllersHandler {
 
 		}
 		if (controller_arm.getType() == Controller.Type.KEYBOARD) {
-			calculateDirectionOfEachServo(keys_arm);
+			calculateDirectionOfEachServo(keys_arm, 5);
 			isDebugEnabled = true;
 			if (keys_arm[0] + keys_arm[1] != 0) {
 				if (isDebugEnabled) {
@@ -1293,37 +1337,38 @@ public class ControllersHandler {
 
 		xAxisPercentage = (int) ServosPositionsCalulations
 				.rescaleValueFromOldMinMax(xAxisPercentage, 0, 100, -49, 50);
-		
-		xAxisPercentage = 50 -49 - xAxisPercentage;
+
+		xAxisPercentage = 50 - 49 - xAxisPercentage;
 		yAxisPercentage = (int) ServosPositionsCalulations
 				.rescaleValueFromOldMinMax(yAxisPercentage, 0, 100, 1, 180);
 		zAxisPercentage = (int) ServosPositionsCalulations
 				.rescaleValueFromOldMinMax(zAxisPercentage, 0, 100, 1, 180);
 
-		yAxisPercentage = 180 + 1 -yAxisPercentage; 
+		yAxisPercentage = 180 + 1 - yAxisPercentage;
 		sliderPercentage = (int) ServosPositionsCalulations
 				.rescaleValueFromOldMinMax(sliderPercentage, 0, 100, 1, 80);
-		
-		sliderPercentage = 80 + 1  - sliderPercentage;
-		
+
+		sliderPercentage = 80 + 1 - sliderPercentage;
+
 		System.out.println("yAxis : " + xAxisPercentage);
 		System.out.println("xAxis : " + yAxisPercentage);
 		System.out.println("zAxis : " + sliderPercentage);
+		if (!joystickControllsCar
+				|| !window.getSelectedCarDevicesName().equals("joystick")) {
+			calculateGripStrength(keys);
 
-		
-		
-		calculateGripStrength(keys);
-
-		if (keys[0] + keys[1] != 0) {
-			if (isDebugEnabled) {
-				System.out.println(servosPositions.getBottomPosition());
+			if (keys[0] + keys[1] != 0) {
+				if (isDebugEnabled) {
+					System.out.println(servosPositions.getBottomPosition());
+				}
+				connection.getHitecProxy().setAngle(
+						Servo.CATCHER.getServoPort(),
+						servosPositions.getCatcherPosition());
 			}
-			connection.getHitecProxy().setAngle(
-					Servo.CATCHER.getServoPort(),
-					servosPositions.getCatcherPosition());
+
+			set_arm_own(yAxisPercentage, xAxisPercentage, sliderPercentage,
+					zAxisPercentage);
 		}
-		
-		set_arm_own(yAxisPercentage,xAxisPercentage,sliderPercentage,zAxisPercentage);
 		window.setArmDevicesButtons(buttonsPanel);
 		// set x and y axes,
 		window.setArmXYAxis(xAxisPercentage, yAxisPercentage);
@@ -1331,71 +1376,74 @@ public class ControllersHandler {
 		window.addArmAxisPanel(axesPanel);
 
 	}
-	
-		double a =100;
-	    double b = 100;
-	    double ed = 90;
-	    
-	    void set_arm_own(double x, double y, double z, double grip_angle_d){
-	    	
-	    	double temp_x = x;
-	    	double l = Math.sqrt(x*x + y*y);
-	    	double base_angle_r = Math.atan(y/x);
-	    	x = l;
-	    	z = z + ed;
-	    	double c = Math.sqrt((x*x) + (z*z));
-	    	double dof2_angle_r = Math.acos((a*a+b*b-c*c)/(2*a*b));
-	    	double theta = Math.acos((c*c+b*b-a*a)/(2*b*c));
-	    	double ang = Math.atan(z/x) + theta;
-	    	double dof1_angle_r = Math.atan(z/x) + theta;
-	    	double x1 = b*Math.cos(ang);
-	    	double z1 = b*Math.sin(ang);
-	    	double d = Math.sqrt((x-x1)*(x-x1) + (z-ed-z1)*(z-ed-z1));
-	    	double dof3_angle_r = Math.acos((a*a+ed*ed-d*d)/(2*a*ed));
-	    	double bottom_angle_r = Math.atan(y/temp_x);
-	    	
-	    	double bottom_angle_d = Math.toDegrees(bottom_angle_r);
-	    	double dof1_angle_d = Math.toDegrees(dof1_angle_r);
-	    	double dof2_angle_d = Math.toDegrees(dof2_angle_r);
-	    	double dof3_angle_d = Math.toDegrees(dof3_angle_r);
-	    	bottom_angle_d += 90;
-	    	
-	    	//bottom_angle_d += 90;
-	    	dof2_angle_d = 180 - dof2_angle_d;
-	    	//dof3_angle_d = 180 -dof3_angle_d;
-	    	dof1_angle_d +=20;
-			
-			if (!( Double.isNaN(dof1_angle_d) ||Double.isNaN(bottom_angle_d)
-					|| Double.isNaN(dof2_angle_d) || Double.isNaN(dof3_angle_d))) {
-				System.out.println("bottom_angle_d: " + bottom_angle_d);
-		    	System.out.println("dof1_angle_d: " + dof1_angle_d);
-				System.out.println("dof2_angle_d: " + dof2_angle_d);
-				System.out.println("dof3_angle_d: " + dof3_angle_d);
-				
-				if (bottom_angle_d > 0 && bottom_angle_d < 180) {
-					connection.getHitecProxy().setAngle(Servo.BOTTOM.getServoPort(),
-							(int) bottom_angle_d);
-				}
-				if (dof1_angle_d > 0 && dof1_angle_d < 180) {
-					connection.getHitecProxy().setAngle(Servo.DOF_1.getServoPort(),
-							(int) dof1_angle_d);
-				}
-				if (dof2_angle_d > 0 && dof2_angle_d < 180) {
-					connection.getHitecProxy().setAngle(Servo.DOF_2.getServoPort(),
-							(int) dof2_angle_d);
-				}
-				if (dof3_angle_d > 0 && dof3_angle_d < 180) {
-					connection.getHitecProxy().setAngle(Servo.DOF_3.getServoPort(),
-							(int) dof3_angle_d);
-				}
-				if (grip_angle_d > 0 && grip_angle_d < 180) {
-					connection.getHitecProxy().setAngle(Servo.CATCHER_ROTATOR.getServoPort(),
-							(int) grip_angle_d);
-				}
 
+	double a = 100;
+	double b = 100;
+	double ed = 90;
+
+	void set_arm_own(double x, double y, double z, double grip_angle_d) {
+
+		double temp_x = x;
+		double l = Math.sqrt(x * x + y * y);
+		double base_angle_r = Math.atan(y / x);
+		x = l;
+		z = z + ed;
+		double c = Math.sqrt((x * x) + (z * z));
+		double dof2_angle_r = Math.acos((a * a + b * b - c * c) / (2 * a * b));
+		double theta = Math.acos((c * c + b * b - a * a) / (2 * b * c));
+		double ang = Math.atan(z / x) + theta;
+		double dof1_angle_r = Math.atan(z / x) + theta;
+		double x1 = b * Math.cos(ang);
+		double z1 = b * Math.sin(ang);
+		double d = Math.sqrt((x - x1) * (x - x1) + (z - ed - z1)
+				* (z - ed - z1));
+		double dof3_angle_r = Math.acos((a * a + ed * ed - d * d)
+				/ (2 * a * ed));
+		double bottom_angle_r = Math.atan(y / temp_x);
+
+		double bottom_angle_d = Math.toDegrees(bottom_angle_r);
+		double dof1_angle_d = Math.toDegrees(dof1_angle_r);
+		double dof2_angle_d = Math.toDegrees(dof2_angle_r);
+		double dof3_angle_d = Math.toDegrees(dof3_angle_r);
+		bottom_angle_d += 90;
+
+		// bottom_angle_d += 90;
+		dof2_angle_d = 180 - dof2_angle_d;
+		// dof3_angle_d = 180 -dof3_angle_d;
+		dof1_angle_d += 20;
+
+		if (!(Double.isNaN(dof1_angle_d) || Double.isNaN(bottom_angle_d)
+				|| Double.isNaN(dof2_angle_d) || Double.isNaN(dof3_angle_d))) {
+			System.out.println("bottom_angle_d: " + bottom_angle_d);
+			System.out.println("dof1_angle_d: " + dof1_angle_d);
+			System.out.println("dof2_angle_d: " + dof2_angle_d);
+			System.out.println("dof3_angle_d: " + dof3_angle_d);
+
+			if (bottom_angle_d > 0 && bottom_angle_d < 180) {
+				connection.getHitecProxy().setAngle(
+						Servo.BOTTOM.getServoPort(), (int) bottom_angle_d);
 			}
-			
-	    }
+			if (dof1_angle_d > 0 && dof1_angle_d < 180) {
+				connection.getHitecProxy().setAngle(Servo.DOF_1.getServoPort(),
+						(int) dof1_angle_d);
+			}
+			if (dof2_angle_d > 0 && dof2_angle_d < 180) {
+				connection.getHitecProxy().setAngle(Servo.DOF_2.getServoPort(),
+						(int) dof2_angle_d);
+			}
+			if (dof3_angle_d > 0 && dof3_angle_d < 180) {
+				connection.getHitecProxy().setAngle(Servo.DOF_3.getServoPort(),
+						(int) dof3_angle_d);
+			}
+			if (grip_angle_d > 0 && grip_angle_d < 180) {
+				connection.getHitecProxy().setAngle(
+						Servo.CATCHER_ROTATOR.getServoPort(),
+						(int) grip_angle_d);
+			}
+
+		}
+
+	}
 
 	public void arms(double a1, double a2, double a3, double a4, double l2,
 			double l3, double l4) {
@@ -1403,16 +1451,17 @@ public class ControllersHandler {
 		double er = Math.cos(a1) * ex + Math.sin(a1) * ey;
 		double u2 = l2 * (Math.cos(a2) * er + Math.sin(a2) * ez);
 		double u3 = l3 * (Math.cos(a2 + a3) * er + Math.sin(a2 + a3) * ez);
-		double u4 = l4 * (Math.cos(a2 + a3 + a4) * er + Math.sin(a2 + a3 + a4) * ez);
+		double u4 = l4
+				* (Math.cos(a2 + a3 + a4) * er + Math.sin(a2 + a3 + a4) * ez);
 		System.out.println("x:  " + u2 + "y: " + u3 + "z: " + u4);
 	}
 
-	
-							// length 3.94"
-	//double BASE_HGT = 100.00; // base hight 2.65"
-	//double HUMERUS = 100.00; // shoulder-to-elbow "bone" 5.75"
-	//double ULNA = 100.00; // elbow-to-wrist "bone" 7.375"
-	//double GRIPPER = 100.00; // gripper (incl.heavy duty wrist rotate mechanism)
+	// length 3.94"
+	// double BASE_HGT = 100.00; // base hight 2.65"
+	// double HUMERUS = 100.00; // shoulder-to-elbow "bone" 5.75"
+	// double ULNA = 100.00; // elbow-to-wrist "bone" 7.375"
+	// double GRIPPER = 100.00; // gripper (incl.heavy duty wrist rotate
+	// mechanism)
 	void set_arm_test3(double x, double y, double z, double grip_angle_d) {
 		double base_angle_r = Math.atan2(y, x);
 		double r = Math.hypot(x, y) - GRIPPER;
@@ -1428,19 +1477,18 @@ public class ControllersHandler {
 		double shl_angle_d = Math.toDegrees(shl_angle_r);
 		double elb_angle_d = Math.toDegrees(elb_angle_r);
 		double wri_angle_d = Math.toDegrees(wri_angle_r);
-		
-		
+
 		wri_angle_d += 75;
-		elb_angle_d = - elb_angle_d - 40;
-		
-		//elb_angle_d = -elb_angle_d - 50;
-		//wri_angle_d += 50;
+		elb_angle_d = -elb_angle_d - 40;
+
+		// elb_angle_d = -elb_angle_d - 50;
+		// wri_angle_d += 50;
 		/* conversion */
 		/*
 		 * base_angle_d += 91; elb_angle_d += 55; wri_angle_d += 30; shl_angle_d
 		 * +=54;
 		 */
-		
+
 		System.out.println("bas_angle_d: " + base_angle_d);
 		System.out.println("shl_angle_d: " + shl_angle_d);
 		System.out.println("elb_angle_d: " + elb_angle_d);
@@ -1468,16 +1516,16 @@ public class ControllersHandler {
 		}
 
 	}
+
 	double BASE_HGT = 50.00; // base hight 2.65"
 	double HUMERUS = 100.00; // shoulder-to-elbow "bone" 5.75"
-    double ULNA = 100.00; // elbow-to-wrist "bone" 7.375"
-    double GRIPPER = 100.00; // gripper (incl.heavy duty wrist rotate mechanism)
-    
-    //double a = 100;
-    //double b = 100;
-    //double ed = 100;
-    
-   
+	double ULNA = 100.00; // elbow-to-wrist "bone" 7.375"
+	double GRIPPER = 100.00; // gripper (incl.heavy duty wrist rotate mechanism)
+
+	// double a = 100;
+	// double b = 100;
+	// double ed = 100;
+
 	void set_arm_test2(double x, double y, double z, double grip_angle_d) {
 		double hum_sq = HUMERUS * HUMERUS;
 		double uln_sq = ULNA * ULNA;
@@ -1518,12 +1566,11 @@ public class ControllersHandler {
 		double bas_angle_d = Math.toDegrees(bas_angle_r);
 
 		/* conversion */
-		
+
 		bas_angle_d = 90 - bas_angle_d;
 		shl_angle_d += 10;
 		elb_angle_d = 180 - elb_angle_d + 40;
 		wri_angle_d = 180 - wri_angle_d + 30;
-		
 
 		System.out.println("bas_angle_d: " + bas_angle_d);
 		System.out.println("shl_angle_d: " + shl_angle_d);
@@ -1719,24 +1766,12 @@ public class ControllersHandler {
 
 				if (isItPressed) {
 					switch (componentIdentifier.getName()) {
-					case "A":
-						keys[0] = 1;
-						break;
-					case "D":
-						keys[1] = 1;
-						break;
-					case "W":
-						keys[2] = 1;
-						break;
-					case "S":
-						keys[3] = 1;
-						break;
-					case "Q":
-						keys[4] = 1;
-						break;
-					case "E":
-						keys[5] = 1;
-						break;
+					case "1":
+						if (joystickControllsCar) {
+							joystickControllsCar = false;
+						} else {
+							joystickControllsCar = true;
+						}
 
 					default:
 					}
@@ -1792,10 +1827,12 @@ public class ControllersHandler {
 		window.setXYAxis(xAxisPercentage, yAxisPercentage);
 		// add other axes panel to window.
 		window.addAxisPanel(axesPanel);
-		int callibration = 1;
-		moveRoboClaws(mecanumDriver, xAxisPercentage + callibration,
-				yAxisPercentage + callibration, zAxisPercentage + callibration,
-				getConnection());
+		if (joystickControllsCar) {
+			int callibration = 1;
+			moveRoboClaws(mecanumDriver, xAxisPercentage + callibration,
+					yAxisPercentage + callibration, zAxisPercentage
+							+ callibration, getConnection());
+		}
 	}
 
 	private void updateCar(MecanumDriver mecanumDriver) {
@@ -1853,31 +1890,34 @@ public class ControllersHandler {
 		// for end
 
 	}
+
 	private int[] calculateGripStrength(int[] keys) {
 		int[] calculateServosMovement = { 0, 0, 0, 0, 0, 0 };
 		int sum12 = keys[0] + keys[1];
 		servosPositions.setCatcherPosition(servosPositions.getCatcherPosition()
-				+ compareArmKeysWithValue(sum12, keys[0],10));
+				+ compareArmKeysWithValue(sum12, keys[0], 10));
 
 		return calculateServosMovement;
 	}
-	private int[] calculateDirectionOfEachServo(int[] keys) {
+
+	private int[] calculateDirectionOfEachServo(int[] keys, int value) {
 		int[] calculateServosMovement = { 0, 0, 0, 0, 0, 0 };
 		int sumNM = keys[0] + keys[1], sumGV = keys[2] + keys[3], sumUH = keys[4]
 				+ keys[5], sum9I = keys[6] + keys[7], sumJK = keys[8] + keys[9], sumOP = keys[10]
 				+ keys[11];
 		servosPositions.setBottomPosition(servosPositions.getBottomPosition()
-				+ compareArmKeys(sumNM, keys[0]));
+				+ compareArmKeysWithValue(sumNM, keys[0], value));
 		servosPositions.setDOF1Position(servosPositions.getDOF1Position()
-				+ compareArmKeys(sumGV, keys[2]));
+				+ compareArmKeysWithValue(sumGV, keys[2], value));
 		servosPositions.setDOF2Position(servosPositions.getDOF2Position()
-				+ compareArmKeys(sumUH, keys[4]));
+				+ compareArmKeysWithValue(sumUH, keys[4], value));
 		servosPositions.setDOF3Position(servosPositions.getDOF3Position()
-				+ compareArmKeys(sum9I, keys[6]));
+				+ compareArmKeysWithValue(sum9I, keys[6], value));
 		servosPositions.setCatcherRotatorPosition(servosPositions
-				.getCatcherRotatorPosition() + compareArmKeys(sumJK, keys[8]));
+				.getCatcherRotatorPosition()
+				+ compareArmKeysWithValue(sumJK, keys[8], value));
 		servosPositions.setCatcherPosition(servosPositions.getCatcherPosition()
-				+ compareArmKeys(sumOP, keys[10]));
+				+ compareArmKeysWithValue(sumOP, keys[10], value));
 
 		return calculateServosMovement;
 	}
@@ -1892,6 +1932,7 @@ public class ControllersHandler {
 				return 2;
 		}
 	}
+
 	private int compareArmKeysWithValue(int sum, int key, int value) {
 		if (sum == 2 || sum == 0) {
 			return 0;
